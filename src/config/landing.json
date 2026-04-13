@@ -1,0 +1,92 @@
+{
+  "hero": {
+    "headline": "Connect. Invite. Celebrate.",
+    "subheadline": "InvestConnect makes it effortless to manage events and invite the right people — all in one place.",
+    "cta": {
+      "primary": { "label": "Get Started", "action": "register" },
+      "secondary": { "label": "Sign In", "action": "login" }
+    }
+  },
+  "benefits": {
+    "title": "Why InvestConnect?",
+    "subtitle": "Everything you need to run seamless events",
+    "items": [
+      {
+        "icon": "Calendar",
+        "title": "Effortless Event Creation",
+        "description": "Create and manage events in minutes with our intuitive interface designed for busy professionals."
+      },
+      {
+        "icon": "Users",
+        "title": "Smart Invitations",
+        "description": "Invite the right people with targeted invitations and track RSVPs in real time."
+      },
+      {
+        "icon": "Bell",
+        "title": "Automated Reminders",
+        "description": "Never miss a follow-up. Automated notifications keep your guests informed and engaged."
+      },
+      {
+        "icon": "BarChart2",
+        "title": "Insightful Analytics",
+        "description": "Understand attendance trends and optimize future events with powerful reporting tools."
+      },
+      {
+        "icon": "Shield",
+        "title": "Secure & Private",
+        "description": "Enterprise-grade security ensures your guest lists and event data stay protected."
+      },
+      {
+        "icon": "Zap",
+        "title": "Lightning Fast",
+        "description": "A blazing-fast platform that scales with your events — from intimate dinners to large conferences."
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "Three simple steps to your next great event",
+    "steps": [
+      {
+        "step": "01",
+        "title": "Create Your Event",
+        "description": "Set your date, location, and agenda. Customize every detail to match your vision."
+      },
+      {
+        "step": "02",
+        "title": "Invite Your Guests",
+        "description": "Select contacts, send personalized invitations, and manage your guest list with ease."
+      },
+      {
+        "step": "03",
+        "title": "Track & Engage",
+        "description": "Monitor RSVPs, send reminders, and keep guests excited leading up to your event."
+      }
+    ]
+  },
+  "testimonials": {
+    "title": "Trusted by Event Organizers",
+    "items": [
+      {
+        "name": "Sarah Mitchell",
+        "role": "Corporate Events Manager",
+        "quote": "InvestConnect has transformed how I manage client events. The invitation tracking alone has saved me hours each week."
+      },
+      {
+        "name": "James Okafor",
+        "role": "Investment Partner",
+        "quote": "The platform is intuitive and polished. Our investor dinners have never been so well-coordinated."
+      },
+      {
+        "name": "Priya Nair",
+        "role": "Conference Organizer",
+        "quote": "From small gatherings to large conferences, InvestConnect handles it all without breaking a sweat."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Ready to Transform Your Events?",
+    "subtitle": "Join hundreds of professionals already using InvestConnect.",
+    "button": { "label": "Start for Free", "action": "register" }
+  }
+}
