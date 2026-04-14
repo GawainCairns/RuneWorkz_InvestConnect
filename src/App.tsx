@@ -1,8 +1,22 @@
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import AlertStack from './components/AlertStack';
+import AdminLayout from './components/organizer/AdminLayout';
+import AdminDashboard from './components/organizer/AdminDashboard';
+import AllEmailLogs from './components/organizer/AllEmailLogs';
+import EmailEditPage from './components/organizer/EmailEditPage';
+import EmailLogs from './components/organizer/EmailLogs';
+import EventDetails from './components/organizer/EventDetails';
+import EventEditForm from './components/organizer/EventEditForm';
+import EventForm from './components/organizer/EventForm';
+import EventList from './components/organizer/EventList';
+import InviteeDashboard from './components/organizer/InviteeDashboard';
+import InviteeList from './components/organizer/InviteeList';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AlertProvider } from './contexts/AlertContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { EmailLogProvider } from './contexts/EmailLogContext';
+import { EventProvider } from './contexts/EventContext';
+import { InviteeProvider } from './contexts/InviteeContext';
 import { TenantProvider } from './contexts/TenantContext';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import HomePage from './pages/HomePage';
@@ -32,31 +46,56 @@ export default function App() {
       <TenantProvider>
         <AuthProvider>
           <AlertProvider>
-            <AlertStack />
-            <Routes>
-              <Route path="/" element={<RootRedirect />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset" element={<ResetPasswordPage />} />
-              <Route
-                path="/home"
-                element={
-                  <ProtectedRoute>
-                    <HomePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <EventProvider>
+              <InviteeProvider>
+                <EmailLogProvider>
+                  <AlertStack />
+                  <Routes>
+                    <Route path="/" element={<RootRedirect />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset" element={<ResetPasswordPage />} />
+                    <Route
+                      path="/home"
+                      element={
+                        <ProtectedRoute>
+                          <HomePage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile"
+                      element={
+                        <ProtectedRoute>
+                          <ProfilePage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin"
+                      element={
+                        <ProtectedRoute>
+                          <AdminLayout />
+                        </ProtectedRoute>
+                      }
+                    >
+                      <Route index element={<AdminDashboard />} />
+                      <Route path="events" element={<EventList />} />
+                      <Route path="events/new" element={<EventForm />} />
+                      <Route path="events/:eventId" element={<EventDetails />} />
+                      <Route path="events/:eventId/edit" element={<EventEditForm />} />
+                      <Route path="events/:eventId/invitees" element={<InviteeList />} />
+                      <Route path="events/:eventId/emails" element={<EmailLogs />} />
+                      <Route path="events/:eventId/email" element={<EmailEditPage />} />
+                      <Route path="emails" element={<AllEmailLogs />} />
+                      <Route path="invitee-dashboard" element={<InviteeDashboard />} />
+                    </Route>
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </EmailLogProvider>
+              </InviteeProvider>
+            </EventProvider>
           </AlertProvider>
         </AuthProvider>
       </TenantProvider>
