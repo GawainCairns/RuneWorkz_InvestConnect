@@ -1,4 +1,5 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { createCtx } from './createCtx';
 
 type AlertType = 'error' | 'success' | 'info';
 
@@ -14,7 +15,7 @@ interface AlertContextValue {
   dismissAlert: (id: string) => void;
 }
 
-const AlertContext = createContext<AlertContextValue | null>(null);
+const [AlertContext, useAlertContext] = createCtx<AlertContextValue>();
 
 export function AlertProvider({ children }: { children: React.ReactNode }) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -36,8 +37,4 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAlert() {
-  const ctx = useContext(AlertContext);
-  if (!ctx) throw new Error('useAlert must be used within AlertProvider');
-  return ctx;
-}
+export const useAlert = useAlertContext;

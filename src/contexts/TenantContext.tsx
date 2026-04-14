@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { createCtx } from './createCtx';
 import { AUTH_API_BASE, TENANT_ID } from '../config/constants';
 
 interface TenantProperty {
@@ -23,7 +24,7 @@ interface TenantContextValue {
   error: string | null;
 }
 
-const TenantContext = createContext<TenantContextValue | null>(null);
+const [TenantContext, useTenantContext] = createCtx<TenantContextValue>();
 
 export function TenantProvider({ children }: { children: React.ReactNode }) {
   const [tenant, setTenant] = useState<TenantData | null>(null);
@@ -59,8 +60,4 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useTenant() {
-  const ctx = useContext(TenantContext);
-  if (!ctx) throw new Error('useTenant must be used within TenantProvider');
-  return ctx;
-}
+export const useTenant = useTenantContext;

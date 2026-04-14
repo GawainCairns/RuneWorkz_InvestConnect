@@ -1,4 +1,5 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { createCtx } from './createCtx';
 import { AUTH_API_BASE, TENANT_ID, TOKEN_STORAGE_KEY } from '../config/constants';
 
 interface UserProfile {
@@ -59,7 +60,7 @@ interface RegisterData {
   active: number;
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+const [AuthContext, useAuthContext] = createCtx<AuthContextValue>();
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
@@ -143,8 +144,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-  return ctx;
-}
+export const useAuth = useAuthContext;
