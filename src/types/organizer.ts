@@ -14,6 +14,17 @@ export interface Event {
   updated_at: string;
 }
 
+export interface Invoice {
+  number: string;
+  entity_name: string;
+  address: string;
+  vat_number: string;
+  contact_person: string;
+  contact_email: string;
+  amount: number;
+  issued_at: string;
+}
+
 export interface Invitee {
   id: string;
   event_id: string;
@@ -22,8 +33,9 @@ export interface Invitee {
   lastname: string;
   dietary: string;
   rsvp_status: 'pending' | 'confirmed' | 'declined';
-  payment_status: 'unpaid' | 'paid';
+  payment_status: 'unpaid' | 'paid' | 'invoice-issued';
   invite_token: string;
+  invoice?: Invoice;
   created_at: string;
 }
 

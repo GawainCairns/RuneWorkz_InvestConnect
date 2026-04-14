@@ -9,7 +9,9 @@ interface InviteeContextValue {
   addInvitee: (data: Omit<Invitee, 'id' | 'invite_token' | 'created_at'>) => Promise<Invitee>;
   addInvitees: (data: Omit<Invitee, 'id' | 'invite_token' | 'created_at'>[]) => Promise<Invitee[]>;
   updateInvitee: (id: string, data: Partial<Invitee>) => Promise<Invitee>;
+  updateInviteeLocal: (id: string, data: Partial<Invitee>) => void;
   markPaid: (id: string) => Promise<void>;
+  getInviteeByToken: (token: string) => Invitee | undefined;
 }
 
 const InviteeContext = createContext<InviteeContextValue | null>(null);
@@ -68,14 +70,25 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
     return updated;
   }, []);
 
+  const updateInviteeLocal = useCallback((id: string, data: Partial<Invitee>) => {
+    setInvitees(prev =>
+      prev.map(inv => (inv.id === id ? { ...inv, ...data } : inv))
+    );
+  }, []);
+
   const markPaid = useCallback(async (id: string) => {
     setInvitees(prev =>
       prev.map(inv => (inv.id === id ? { ...inv, payment_status: 'paid' } : inv))
     );
   }, []);
 
+  const getInviteeByToken = useCallback(
+    (token: string) => invitees.find(inv => inv.invite_token === token),
+    [invitees]
+  );
+
   return (
-    <InviteeContext.Provider value={{ invitees, loading, error, fetchInvitees, addInvitee, addInvitees, updateInvitee, markPaid }}>
+    <InviteeContext.Provider value={{ invitees, loading, error, fetchInvitees, addInvitee, addInvitees, updateInvitee, updateInviteeLocal, markPaid, getInviteeByToken }}>
       {children}
     </InviteeContext.Provider>
   );

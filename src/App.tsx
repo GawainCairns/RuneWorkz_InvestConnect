@@ -1,5 +1,11 @@
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import AlertStack from './components/AlertStack';
+import ConfirmationPage from './components/attendee/ConfirmationPage';
+import DietaryPage from './components/attendee/DietaryPage';
+import InvitationLanding from './components/attendee/InvitationLanding';
+import InvoiceForm from './components/attendee/InvoiceForm';
+import PaymentPage from './components/attendee/PaymentPage';
+import RSVPPage from './components/attendee/RSVPPage';
 import AdminLayout from './components/organizer/AdminLayout';
 import AdminDashboard from './components/organizer/AdminDashboard';
 import AllEmailLogs from './components/organizer/AllEmailLogs';
@@ -91,6 +97,12 @@ export default function App() {
                       <Route path="emails" element={<AllEmailLogs />} />
                       <Route path="invitee-dashboard" element={<InviteeDashboard />} />
                     </Route>
+                    <Route path="/rsvp/:token" element={<InvitationLanding />} />
+                    <Route path="/rsvp/:token/respond" element={<RSVPPage />} />
+                    <Route path="/rsvp/:token/dietary" element={<DietaryPage />} />
+                    <Route path="/rsvp/:token/payment" element={<PaymentPage />} />
+                    <Route path="/rsvp/:token/invoice" element={<InvoiceForm />} />
+                    <Route path="/rsvp/:token/confirmation" element={<ConfirmationPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </EmailLogProvider>
