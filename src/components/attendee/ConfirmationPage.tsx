@@ -63,7 +63,7 @@ export default function ConfirmationPage() {
   if (!invitee || !event) {
     return (
       <AttendeeLayout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-screen">
           <p className="text-slate-500">Invitation not found.</p>
         </div>
       </AttendeeLayout>
@@ -87,21 +87,21 @@ export default function ConfirmationPage() {
 
   return (
     <AttendeeLayout>
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
         <div className="w-full max-w-md">
-          <div className="text-center mb-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Step 4 of 4</span>
+          <div className="mb-2 text-center">
+            <span className="text-xs font-semibold tracking-widest uppercase text-slate-400">Step 4 of 4</span>
           </div>
-          <div className="h-1 w-full bg-slate-200 rounded-full mb-8 overflow-hidden">
-            <div className="h-1 bg-brand-600 rounded-full w-full" />
+          <div className="w-full h-1 mb-8 overflow-hidden rounded-full bg-slate-200">
+            <div className="w-full h-1 rounded-full bg-brand-600" />
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-8">
-            <div className="text-center mb-6">
+          <div className="p-8 bg-white border shadow-lg rounded-xl border-slate-200">
+            <div className="mb-6 text-center">
               {isConfirmed ? (
-                <CheckCircle className="w-14 h-14 text-emerald-500 mx-auto mb-3" />
+                <CheckCircle className="mx-auto mb-3 w-14 h-14 text-emerald-500" />
               ) : (
-                <XCircle className="w-14 h-14 text-slate-400 mx-auto mb-3" />
+                <XCircle className="mx-auto mb-3 w-14 h-14 text-slate-400" />
               )}
               <span
                 className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mb-3 ${
@@ -110,17 +110,17 @@ export default function ConfirmationPage() {
               >
                 {isConfirmed ? 'Attendance Confirmed' : 'Unable to Attend'}
               </span>
-              <h1 className="text-xl font-bold text-slate-900 mb-1">
+              <h1 className="mb-1 text-xl font-bold text-slate-900">
                 {isConfirmed ? "You're all set!" : 'Thanks for letting us know'}
               </h1>
-              <p className="text-slate-500 text-sm">
+              <p className="text-sm text-slate-500">
                 {isConfirmed
                   ? `A confirmation has been sent to ${invitee.email}.`
                   : `We've noted your response for ${event.title}.`}
               </p>
             </div>
 
-            <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-3 mb-5">
+            <div className="p-4 mb-5 space-y-3 border bg-slate-50 rounded-xl border-slate-200">
               <div className="flex items-start gap-3">
                 <Calendar className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
                 <div>
@@ -147,7 +147,7 @@ export default function ConfirmationPage() {
             </div>
 
             {isConfirmed && event.price > 0 && (
-              <div className="flex items-center justify-between px-4 py-3 rounded-lg border border-slate-200 bg-white mb-5">
+              <div className="flex items-center justify-between px-4 py-3 mb-5 bg-white border rounded-lg border-slate-200">
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-slate-400" />
                   <span className="text-sm text-slate-700">Payment</span>
@@ -159,9 +159,9 @@ export default function ConfirmationPage() {
             )}
 
             {invitee.invoice && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-5 text-sm">
-                <p className="font-semibold text-amber-800 mb-1">Invoice {invitee.invoice.number}</p>
-                <p className="text-amber-700 text-xs">
+              <div className="px-4 py-3 mb-5 text-sm border rounded-lg bg-amber-50 border-amber-200">
+                <p className="mb-1 font-semibold text-amber-800">Invoice {invitee.invoice.number}</p>
+                <p className="text-xs text-amber-700">
                   Sent to {invitee.invoice.contact_email} · ${invitee.invoice.amount.toFixed(2)}
                 </p>
               </div>
@@ -172,7 +172,7 @@ export default function ConfirmationPage() {
                 href={calendarUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-3 bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 transition-colors"
+                className="flex items-center justify-center w-full gap-2 py-3 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
               >
                 <CalendarPlus className="w-5 h-5" />
                 Add to Calendar
@@ -180,7 +180,7 @@ export default function ConfirmationPage() {
             )}
           </div>
 
-          <p className="text-center text-xs text-slate-400 mt-6">
+          <p className="mt-6 text-xs text-center text-slate-400">
             Questions? Contact the event organizer.
           </p>
         </div>
