@@ -1,4 +1,7 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useAuth } from './AuthContext';
+import { eventService } from '../services/eventService';
+import type { ApiEvent } from '../types/api';
 import type { Event } from '../types/organizer';
 
 interface EventContextValue {
@@ -23,7 +26,25 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      setEvents([]);
+      // fetch from API and map to local Event type
+      const res = await eventService.getAll();
+      const apiEvents: ApiEvent[] = (res && (res as any).events) || [];
+      const mapped = apiEvents.map(e => ({
+        id: String(e.id),
+        brand: String(e.brandId ?? ''),
+        title: e.title || '',
+        description: e.description || '',
+        date: e.date || '',
+        start_time: e.startTime || '',
+        end_time: e.endTime || '',
+        location: e.location || '',
+        price: e.price || 0,
+        capacity: e.capacity ?? null,
+        tenant_id: '',
+        created_at: e.createdAt || '',
+        updated_at: e.updatedAt || '',
+      }));
+      setEvents(mapped);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch events');
     } finally {
@@ -63,6 +84,28 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const getEvent = useCallback((id: string) => events.find(e => e.id === id), [events]);
+
+  const { profile } = useAuth();
+
+  useEffect(() => {
+    function hasAdminRole(profileParam: any) {
+      if (!profileParam) return false;
+      const roles = profileParam.roles || [];
+      for (const r of roles) {
+        if (!r) continue;
+        const name = (r.name || '').toString().toLowerCase();
+        if (name === 'admin') return true;
+        const perms = r.permissions || [];
+        if (perms.some((p: any) => (p.name || '').toString().toLowerCase() === 'admin' && Number(p.value) === 1)) return true;
+      }
+      return false;
+    }
+
+    if (hasAdminRole(profile)) {
+      // load events for admin users
+      fetchEvents().catch(() => {});
+    }
+  }, [profile]);
 
   return (
     <EventContext.Provider value={{ events, loading, error, fetchEvents, createEvent, updateEvent, deleteEvent, getEvent }}>

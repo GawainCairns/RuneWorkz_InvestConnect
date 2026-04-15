@@ -15,7 +15,7 @@ interface StatCardProps {
 
 function StatCard({ icon, label, value, color }: StatCardProps) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+    <div className="p-5 bg-white border shadow-sm rounded-xl border-slate-200">
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-medium text-slate-600">{label}</span>
         <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${color}`}>{icon}</div>
@@ -32,8 +32,8 @@ export default function AdminDashboard() {
   const { emailLogs, fetchEmailLogs } = useEmailLogs();
 
   useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+    if (!events.length && !eventsLoading) fetchEvents();
+  }, [fetchEvents, events.length, eventsLoading]);
 
   useEffect(() => {
     events.forEach(e => fetchInvitees(e.id));
@@ -61,22 +61,22 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-slate-500 text-sm mt-1">Overview of your events and guests</p>
+          <p className="mt-1 text-sm text-slate-500">Overview of your events and guests</p>
         </div>
         <button
           onClick={() => navigate('/admin/events/new')}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg shadow-sm bg-brand-600 hover:bg-brand-700"
         >
           <Plus className="w-4 h-4" />
           New Event
         </button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-4 mb-8 lg:grid-cols-4">
         <StatCard
           icon={<Calendar className="w-5 h-5 text-brand-600" />}
           label="Total Events"
@@ -103,20 +103,20 @@ export default function AdminDashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
           {eventsLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="w-7 h-7 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+              <div className="border-4 rounded-full w-7 h-7 border-brand-600 border-t-transparent animate-spin" />
             </div>
           ) : (
             <>
               {upcoming.length > 0 && (
                 <section>
-                  <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+                  <h2 className="mb-3 text-xs font-semibold tracking-wide uppercase text-slate-500">
                     Upcoming Events
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {upcoming.slice(0, 4).map(event => (
                       <EventCard
                         key={event.id}
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
                   {upcoming.length > 4 && (
                     <button
                       onClick={() => navigate('/admin/events')}
-                      className="mt-3 text-sm text-brand-600 hover:text-brand-700 font-medium"
+                      className="mt-3 text-sm font-medium text-brand-600 hover:text-brand-700"
                     >
                       View all {upcoming.length} upcoming events →
                     </button>
@@ -139,10 +139,10 @@ export default function AdminDashboard() {
 
               {past.length > 0 && (
                 <section>
-                  <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+                  <h2 className="mb-3 text-xs font-semibold tracking-wide uppercase text-slate-500">
                     Past Events
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-75">
+                  <div className="grid grid-cols-1 gap-4 opacity-75 sm:grid-cols-2">
                     {past.slice(0, 2).map(event => (
                       <EventCard
                         key={event.id}
@@ -156,13 +156,13 @@ export default function AdminDashboard() {
               )}
 
               {events.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-xl border border-slate-200">
-                  <Calendar className="w-10 h-10 text-slate-300 mb-3" />
-                  <h3 className="text-base font-semibold text-slate-900 mb-1">No events yet</h3>
-                  <p className="text-sm text-slate-500 mb-4">Create your first event to get started.</p>
+                <div className="flex flex-col items-center justify-center py-16 text-center bg-white border rounded-xl border-slate-200">
+                  <Calendar className="w-10 h-10 mb-3 text-slate-300" />
+                  <h3 className="mb-1 text-base font-semibold text-slate-900">No events yet</h3>
+                  <p className="mb-4 text-sm text-slate-500">Create your first event to get started.</p>
                   <button
                     onClick={() => navigate('/admin/events/new')}
-                    className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
                   >
                     <Plus className="w-4 h-4" />
                     Create Event
@@ -174,8 +174,8 @@ export default function AdminDashboard() {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-            <h3 className="text-sm font-semibold text-slate-900 mb-4">Quick Actions</h3>
+          <div className="p-5 bg-white border shadow-sm rounded-xl border-slate-200">
+            <h3 className="mb-4 text-sm font-semibold text-slate-900">Quick Actions</h3>
             <div className="space-y-2">
               {[
                 { label: 'Create Event', icon: <Plus className="w-4 h-4" />, path: '/admin/events/new', color: 'bg-brand-600 text-white hover:bg-brand-700' },
@@ -195,9 +195,9 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Email Activity</h3>
-            <div className="text-3xl font-bold text-slate-900 mb-1">{emailLogs.length}</div>
+          <div className="p-5 bg-white border shadow-sm rounded-xl border-slate-200">
+            <h3 className="mb-3 text-sm font-semibold text-slate-900">Email Activity</h3>
+            <div className="mb-1 text-3xl font-bold text-slate-900">{emailLogs.length}</div>
             <p className="text-sm text-slate-500">emails sent across all events</p>
           </div>
         </div>
