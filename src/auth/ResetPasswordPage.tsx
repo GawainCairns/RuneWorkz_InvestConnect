@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
       setPageState('success');
 
       setTimeout(() => {
-        navigate('/home', { replace: true });
+        navigate('/', { replace: true });
       }, 2000);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');

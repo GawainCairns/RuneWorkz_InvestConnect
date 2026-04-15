@@ -20,7 +20,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (token) navigate('/home', { replace: true });
+    if (token) navigate('/', { replace: true });
   }, [token, navigate]);
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -39,7 +39,7 @@ export default function RegisterPage() {
         avatar: null,
         active: 1,
       });
-      navigate('/home', { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       showAlert(err instanceof Error ? err.message : 'Registration failed', 'error');
     } finally {

@@ -31,7 +31,7 @@ export default function AdminRoute({ children }: Props) {
 
   if (!token) return <Navigate to="/login" replace />;
 
-  if (!hasAdminRole(profile)) return <Navigate to="/home" replace />;
+  if (!hasAdminRole(profile)) return <Navigate to="/admin/invitee-dashboard" replace />;
 
   return <>{children}</>;
 }

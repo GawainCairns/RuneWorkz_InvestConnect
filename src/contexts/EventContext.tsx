@@ -100,7 +100,6 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
       }
       return false;
     }
-
     if (hasAdminRole(profile)) {
       // load events for admin users
       fetchEvents().catch(() => {});

@@ -25,16 +25,15 @@ import { EmailLogProvider } from './contexts/EmailLogContext';
 import { EventProvider } from './contexts/EventContext';
 import { InviteeProvider } from './contexts/InviteeContext';
 import { TenantProvider } from './contexts/TenantContext';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import HomePage from './pages/HomePage';
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import ProfilePage from './pages/ProfilePage';
-import RegisterPage from './pages/RegisterPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
+import ForgotPasswordPage from './auth/ForgotPasswordPage';
+import LandingPage from './auth/LandingPage';
+import LoginPage from './auth/LoginPage';
+import ProfilePage from './auth/ProfilePage';
+import RegisterPage from './auth/RegisterPage';
+import ResetPasswordPage from './auth/ResetPasswordPage';
 
 function RootRedirect() {
-  const { token, loading } = useAuth();
+  const { token, loading, profile } = useAuth();
 
   if (loading) {
     return (
@@ -44,7 +43,12 @@ function RootRedirect() {
     );
   }
 
-  return token ? <Navigate to="/home" replace /> : <LandingPage />;
+  if (token) {
+    const isAdmin = !!profile?.roles?.some((r: any) => (r?.name || '').toString().toLowerCase() === 'admin' || (r?.permissions || []).some((p: any) => (p?.name || '').toString().toLowerCase() === 'admin' && Number(p.value) === 1));
+    return <Navigate to={isAdmin ? '/admin' : '/admin/invitee-dashboard'} replace />;
+  }
+
+  return <LandingPage />;
 }
 
 export default function App() {
@@ -63,14 +67,7 @@ export default function App() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/reset" element={<ResetPasswordPage />} />
-                    <Route
-                      path="/home"
-                      element={
-                        <ProtectedRoute>
-                          <HomePage />
-                        </ProtectedRoute>
-                      }
-                    />
+                    
                     <Route
                       path="/profile"
                       element={

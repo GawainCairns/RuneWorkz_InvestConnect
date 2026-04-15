@@ -16,9 +16,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!token) return;
-    const isAdmin = !!profile?.roles?.some((r: any) => (r?.name || '').toString().toLowerCase() === 'admin' || (r?.permissions || []).some((p: any) => (p?.name || '').toString().toLowerCase() === 'admin' && Number(p.value) === 1));
-    navigate(isAdmin ? '/admin' : '/home', { replace: true });
-  }, [token, profile, navigate]);
+    navigate('/', { replace: true });
+  }, [token, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
