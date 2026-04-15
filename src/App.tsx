@@ -18,6 +18,7 @@ import EventList from './components/organizer/EventList';
 import InviteeDashboard from './components/organizer/InviteeDashboard';
 import InviteeList from './components/organizer/InviteeList';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 import { AlertProvider } from './contexts/AlertContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { EmailLogProvider } from './contexts/EmailLogContext';
@@ -78,14 +79,7 @@ export default function App() {
                         </ProtectedRoute>
                       }
                     />
-                    <Route
-                      path="/admin"
-                      element={
-                        <ProtectedRoute>
-                          <AdminLayout />
-                        </ProtectedRoute>
-                      }
-                    >
+                    <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
                       <Route index element={<AdminDashboard />} />
                       <Route path="events" element={<EventList />} />
                       <Route path="events/new" element={<EventForm />} />

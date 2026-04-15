@@ -5,7 +5,7 @@ import { useAlert } from '../contexts/AlertContext';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
-  const { login, token } = useAuth();
+  const { login, token, profile } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
 
@@ -15,15 +15,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (token) navigate('/home', { replace: true });
-  }, [token, navigate]);
+    if (!token) return;
+    const isAdmin = !!profile?.roles?.some((r: any) => (r?.name || '').toString().toLowerCase() === 'admin' || (r?.permissions || []).some((p: any) => (p?.name || '').toString().toLowerCase() === 'admin' && Number(p.value) === 1));
+    navigate(isAdmin ? '/admin' : '/home', { replace: true });
+  }, [token, profile, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       await login(email, password);
-      navigate('/home', { replace: true });
+      // redirect handled by effect when profile/token updates
     } catch (err) {
       showAlert(err instanceof Error ? err.message : 'Login failed', 'error');
     } finally {

@@ -12,6 +12,19 @@ export default function Header() {
     ? `${profile.user.firstname} ${profile.user.lastname}`
     : '';
 
+  function hasAdminRole(profile: any) {
+    if (!profile) return false;
+    const roles = profile.roles || [];
+    for (const r of roles) {
+      if (!r) continue;
+      const name = (r.name || '').toString().toLowerCase();
+      if (name === 'admin') return true;
+      const perms = r.permissions || [];
+      if (perms.some((p: any) => (p.name || '').toString().toLowerCase() === 'admin' && Number(p.value) === 1)) return true;
+    }
+    return false;
+  }
+
   const handleLogout = () => {
     setMenuOpen(false);
     logout();
@@ -60,6 +73,22 @@ export default function Header() {
                   <User className="w-4 h-4 text-gray-400" />
                   Profile
                 </button>
+                {hasAdminRole(profile) && (
+                  <>
+                    <button
+                      onClick={() => { setMenuOpen(false); navigate('/admin/events'); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      Events
+                    </button>
+                    <button
+                      onClick={() => { setMenuOpen(false); navigate('/admin/emails'); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      Email Logs
+                    </button>
+                  </>
+                )}
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
