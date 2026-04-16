@@ -13,15 +13,17 @@ export default function InvitationLanding() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { getInviteeByToken, updateInvitee, fetchInvitees } = useInvitees();
-  const { getEvent, fetchEvents } = useEvents();
+  const { getEvent, fetchEvents, events, loading: eventsLoading } = useEvents();
 
   const [detailsForm, setDetailsForm] = useState({ firstname: '', lastname: '', email: '' });
   const [detailsError, setDetailsError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+    if (!events.length && !eventsLoading) {
+      fetchEvents().catch(() => {});
+    }
+  }, [fetchEvents, events.length, eventsLoading]);
 
   const invitee = token ? getInviteeByToken(token) : undefined;
   const event = invitee ? getEvent(invitee.event_id) : undefined;

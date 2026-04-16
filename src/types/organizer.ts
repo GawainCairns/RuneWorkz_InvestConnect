@@ -32,7 +32,7 @@ export interface Invitee {
   firstname: string;
   lastname: string;
   dietary: string;
-  rsvp_status: 'pending' | 'confirmed' | 'declined';
+  rsvp_status: 'pending' | 'yes' | 'no';
   payment_status: 'unpaid' | 'paid' | 'invoice-issued';
   invite_token: string;
   invoice?: Invoice;

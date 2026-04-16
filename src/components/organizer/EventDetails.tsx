@@ -49,9 +49,9 @@ export default function EventDetails() {
 
   if (!event) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8 text-center">
+      <div className="px-4 py-8 mx-auto text-center max-w-7xl">
         <p className="text-slate-500">Event not found.</p>
-        <button onClick={() => navigate('/admin/events')} className="mt-4 text-brand-600 hover:underline text-sm">
+        <button onClick={() => navigate('/admin/events')} className="mt-4 text-sm text-brand-600 hover:underline">
           Back to Events
         </button>
       </div>
@@ -59,16 +59,31 @@ export default function EventDetails() {
   }
 
   const eventInvitees = invitees.filter(i => i.event_id === eventId);
-  const confirmedCount = eventInvitees.filter(i => i.rsvp_status === 'confirmed').length;
+  const confirmedCount = eventInvitees.filter(i => i.rsvp_status === 'yes').length;
   const paidCount = eventInvitees.filter(i => i.payment_status === 'paid').length;
   const eventEmails = emailLogs.filter(l => l.event_id === eventId);
 
+  const isPast = (() => {
+    try {
+      const end = new Date(event.date);
+      if (event.end_time) {
+        const [eh, em] = event.end_time.split(':');
+        end.setHours(Number(eh), Number(em), 0, 0);
+      } else {
+        end.setHours(23, 59, 59, 999);
+      }
+      return end < new Date();
+    } catch (err) {
+      return false;
+    }
+  })();
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate('/admin/events')}
-          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
+          className="flex items-center gap-2 text-sm transition-colors text-slate-600 hover:text-slate-900"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Events
@@ -76,14 +91,14 @@ export default function EventDetails() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(`/admin/events/${eventId}/email`)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors bg-white border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50"
           >
             <Mail className="w-4 h-4" />
             Email Template
           </button>
           <button
             onClick={() => navigate(`/admin/events/${eventId}/edit`)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
           >
             <Edit className="w-4 h-4" />
             Edit Event
@@ -91,7 +106,7 @@ export default function EventDetails() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm mb-6">
+      <div className="mb-6 bg-white border shadow-sm rounded-xl border-slate-200">
         <div className="p-6">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
@@ -111,7 +126,7 @@ export default function EventDetails() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-3">
             <div className="flex items-center gap-2.5 text-sm text-slate-600">
               <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
               {formatDate(event.date)}
@@ -126,27 +141,29 @@ export default function EventDetails() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-slate-50 rounded-lg px-4 py-3 text-center">
-              <div className="text-2xl font-bold text-slate-900">{eventInvitees.length}</div>
-              <div className="text-xs text-slate-500 mt-0.5 flex items-center justify-center gap-1">
-                <Users className="w-3 h-3" />
-                Invited
+          {!isPast && (
+            <div className="grid grid-cols-3 gap-4">
+              <div className="px-4 py-3 text-center rounded-lg bg-slate-50">
+                <div className="text-2xl font-bold text-slate-900">{eventInvitees.length}</div>
+                <div className="text-xs text-slate-500 mt-0.5 flex items-center justify-center gap-1">
+                  <Users className="w-3 h-3" />
+                  Invited
+                </div>
+              </div>
+              <div className="px-4 py-3 text-center rounded-lg bg-emerald-50">
+                <div className="text-2xl font-bold text-emerald-700">{confirmedCount}</div>
+                <div className="text-xs text-slate-500 mt-0.5">Confirmed</div>
+              </div>
+              <div className="px-4 py-3 text-center rounded-lg bg-brand-50">
+                <div className="text-2xl font-bold text-brand-700">{paidCount}</div>
+                <div className="text-xs text-slate-500 mt-0.5">Paid</div>
               </div>
             </div>
-            <div className="bg-emerald-50 rounded-lg px-4 py-3 text-center">
-              <div className="text-2xl font-bold text-emerald-700">{confirmedCount}</div>
-              <div className="text-xs text-slate-500 mt-0.5">Confirmed</div>
-            </div>
-            <div className="bg-brand-50 rounded-lg px-4 py-3 text-center">
-              <div className="text-2xl font-bold text-brand-700">{paidCount}</div>
-              <div className="text-xs text-slate-500 mt-0.5">Paid</div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+      <div className="bg-white border shadow-sm rounded-xl border-slate-200">
         <div className="border-b border-slate-200">
           <div className="flex">
             {(['invitees', 'emails'] as Tab[]).map(tab => (

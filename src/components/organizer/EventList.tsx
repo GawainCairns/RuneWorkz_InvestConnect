@@ -11,8 +11,10 @@ export default function EventList() {
   const { invitees } = useInvitees();
 
   useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+    if (!events.length && !loading) {
+      fetchEvents().catch(() => {});
+    }
+  }, [fetchEvents, events.length, loading]);
 
   const now = new Date().toISOString().split('T')[0];
   const upcoming = events.filter(e => e.date >= now);
@@ -22,7 +24,7 @@ export default function EventList() {
     const evInvitees = invitees.filter(i => i.event_id === eventId);
     return {
       inviteeCount: evInvitees.length,
-      confirmedCount: evInvitees.filter(i => i.rsvp_status === 'confirmed').length,
+      confirmedCount: evInvitees.filter(i => i.rsvp_status === 'yes').length,
       paidCount: evInvitees.filter(i => i.payment_status === 'paid').length,
     };
   };
@@ -77,6 +79,7 @@ export default function EventList() {
                     key={event.id}
                     event={event}
                     {...getStats(event.id)}
+                    showStats={true}
                     onClick={() => navigate(`/admin/events/${event.id}`)}
                   />
                 ))}
@@ -95,6 +98,7 @@ export default function EventList() {
                     key={event.id}
                     event={event}
                     {...getStats(event.id)}
+                    showStats={true}
                     onClick={() => navigate(`/admin/events/${event.id}`)}
                   />
                 ))}

@@ -48,14 +48,14 @@ export default function AdminDashboard() {
   const past = events.filter(e => e.date < now).sort((a, b) => b.date.localeCompare(a.date));
 
   const totalInvitees = invitees.length;
-  const totalConfirmed = invitees.filter(i => i.rsvp_status === 'confirmed').length;
+  const totalConfirmed = invitees.filter(i => i.rsvp_status === 'yes').length;
   const totalPaid = invitees.filter(i => i.payment_status === 'paid').length;
 
   const getStats = (eventId: string) => {
     const evInvitees = invitees.filter(i => i.event_id === eventId);
     return {
       inviteeCount: evInvitees.length,
-      confirmedCount: evInvitees.filter(i => i.rsvp_status === 'confirmed').length,
+      confirmedCount: evInvitees.filter(i => i.rsvp_status === 'yes').length,
       paidCount: evInvitees.filter(i => i.payment_status === 'paid').length,
     };
   };

@@ -88,23 +88,14 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   const { profile } = useAuth();
 
   useEffect(() => {
-    function hasAdminRole(profileParam: any) {
-      if (!profileParam) return false;
-      const roles = profileParam.roles || [];
-      for (const r of roles) {
-        if (!r) continue;
-        const name = (r.name || '').toString().toLowerCase();
-        if (name === 'admin') return true;
-        const perms = r.permissions || [];
-        if (perms.some((p: any) => (p.name || '').toString().toLowerCase() === 'admin' && Number(p.value) === 1)) return true;
-      }
-      return false;
-    }
-    if (hasAdminRole(profile)) {
-      // load events for admin users
+    // Fetch events when a user logs in (profile becomes available).
+    // Clear events on logout.
+    if (profile) {
       fetchEvents().catch(() => {});
+    } else {
+      setEvents([]);
     }
-  }, [profile]);
+  }, [profile, fetchEvents]);
 
   return (
     <EventContext.Provider value={{ events, loading, error, fetchEvents, createEvent, updateEvent, deleteEvent, getEvent }}>

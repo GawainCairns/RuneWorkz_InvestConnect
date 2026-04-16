@@ -6,6 +6,7 @@ interface EventCardProps {
   inviteeCount?: number;
   confirmedCount?: number;
   paidCount?: number;
+  showStats?: boolean;
   onClick?: () => void;
   selected?: boolean;
 }
@@ -26,14 +27,25 @@ function formatTime(timeStr: string) {
   return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
+function isPastEvent(dateStr: string) {
+  const eventDate = new Date(dateStr);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return eventDate < today;
+}
+
 export default function EventCard({
   event,
   inviteeCount = 0,
   confirmedCount = 0,
   paidCount = 0,
+  showStats,
   onClick,
   selected = false,
 }: EventCardProps) {
+  const past = isPastEvent(event.date);
+  const shouldShowStats = typeof showStats === 'boolean' ? showStats : !past;
+
   return (
     <div
       onClick={onClick}
@@ -81,23 +93,25 @@ export default function EventCard({
         </div>
       </div>
 
-      <div className="border-t border-slate-100 grid grid-cols-3 divide-x divide-slate-100">
-        <div className="px-4 py-3 text-center">
-          <div className="text-lg font-bold text-slate-900">{inviteeCount}</div>
-          <div className="text-xs text-slate-500 flex items-center justify-center gap-1">
-            <Users className="w-3 h-3" />
-            Invited
+      {shouldShowStats && (
+        <div className="border-t border-slate-100 grid grid-cols-3 divide-x divide-slate-100">
+          <div className="px-4 py-3 text-center">
+            <div className="text-lg font-bold text-slate-900">{inviteeCount}</div>
+            <div className="text-xs text-slate-500 flex items-center justify-center gap-1">
+              <Users className="w-3 h-3" />
+              Invited
+            </div>
+          </div>
+          <div className="px-4 py-3 text-center">
+            <div className="text-lg font-bold text-emerald-600">{confirmedCount}</div>
+            <div className="text-xs text-slate-500">Confirmed</div>
+          </div>
+          <div className="px-4 py-3 text-center">
+            <div className="text-lg font-bold text-brand-600">{paidCount}</div>
+            <div className="text-xs text-slate-500">Paid</div>
           </div>
         </div>
-        <div className="px-4 py-3 text-center">
-          <div className="text-lg font-bold text-emerald-600">{confirmedCount}</div>
-          <div className="text-xs text-slate-500">Confirmed</div>
-        </div>
-        <div className="px-4 py-3 text-center">
-          <div className="text-lg font-bold text-brand-600">{paidCount}</div>
-          <div className="text-xs text-slate-500">Paid</div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

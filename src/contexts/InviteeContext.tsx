@@ -1,4 +1,8 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useAuth } from './AuthContext';
+import { useEvents } from './EventContext';
+import { inviteeService } from '../services/inviteeService';
+import type { ApiInvitee } from '../types/api';
 import type { Invitee } from '../types/organizer';
 
 interface InviteeContextValue {
@@ -25,7 +29,26 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      setInvitees([]);
+      const res = await inviteeService.getAll({ eventId: Number(_eventId) } as any);
+      const apiInvitees: ApiInvitee[] = (res && (res as any).invitees) || [];
+      const mapped = apiInvitees.map(i => ({
+        id: String(i.id),
+        event_id: String(i.eventId),
+        email: i.email || '',
+        firstname: i.firstname || '',
+        lastname: i.surname || '',
+        dietary: i.dietary || '',
+        rsvp_status: (i.rsvpStatus as any) || 'pending',
+        payment_status: (i.paymentStatus as any) || 'unpaid',
+        invite_token: (i.inviteCode as any) || '',
+        created_at: i.createdAt || '',
+      }));
+      // replace invitees for this event
+      setInvitees(prev => {
+        // remove any existing for this event and append fetched
+        const others = prev.filter(inv => inv.event_id !== String(_eventId));
+        return [...others, ...mapped];
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch invitees');
     } finally {
@@ -86,6 +109,23 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
     (token: string) => invitees.find(inv => inv.invite_token === token),
     [invitees]
   );
+
+  const { token, profile } = useAuth();
+  const { events } = useEvents();
+
+  useEffect(() => {
+    if (!token) return;
+    if (!events || events.length === 0) return;
+
+    // load invitees for events that don't yet have invitees loaded
+    for (const ev of events) {
+      const hasForEvent = invitees.some(i => i.event_id === ev.id);
+      if (!hasForEvent) {
+        fetchInvitees(ev.id).catch(() => {});
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, profile, events]);
 
   return (
     <InviteeContext.Provider value={{ invitees, loading, error, fetchInvitees, addInvitee, addInvitees, updateInvitee, updateInviteeLocal, markPaid, getInviteeByToken }}>
