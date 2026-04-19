@@ -1,7 +1,6 @@
 import { Calendar, CheckCircle, DollarSign, Mail, Plus, Users } from 'lucide-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useEmailLogs } from '../../contexts/EmailLogContext';
 import { useEvents } from '../../contexts/EventContext';
 import { useInvitees } from '../../contexts/InviteeContext';
 import EventCard from './EventCard';
@@ -29,7 +28,6 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { events, loading: eventsLoading, fetchEvents } = useEvents();
   const { invitees, fetchInvitees } = useInvitees();
-  const { emailLogs, fetchEmailLogs } = useEmailLogs();
 
   useEffect(() => {
     if (!events.length && !eventsLoading) fetchEvents();
@@ -38,10 +36,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     events.forEach(e => fetchInvitees(e.id));
   }, [events, fetchInvitees]);
-
-  useEffect(() => {
-    fetchEmailLogs();
-  }, [fetchEmailLogs]);
 
   const now = new Date().toISOString().split('T')[0];
   const upcoming = events.filter(e => e.date >= now).sort((a, b) => a.date.localeCompare(b.date));
@@ -103,8 +97,37 @@ export default function AdminDashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+      {/* Quick Actions: placed after stats and above upcoming events; matches single stat card width */}
+      <h2 className="mb-3 text-xs font-semibold tracking-wide uppercase text-slate-500">
+        Quick Actions
+      </h2>
+      <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="lg:col-span-3">
+          <div className="p-5 bg-white border shadow-sm rounded-xl border-slate-200">
+            
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              {[
+                { label: 'Create Event', icon: <Plus className="w-4 h-4" />, path: '/admin/events/new', color: 'bg-brand-600 text-white hover:bg-brand-700' },
+                { label: 'View All Events', icon: <Calendar className="w-4 h-4" />, path: '/admin/events', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
+                { label: 'All Email Logs', icon: <Mail className="w-4 h-4" />, path: '/admin/emails', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
+                { label: 'My Invitations', icon: <Users className="w-4 h-4" />, path: '/admin/invitee-dashboard', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
+              ].map(action => (
+                <button
+                  key={action.path}
+                  onClick={() => navigate(action.path)}
+                  className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${action.color}`}
+                >
+                  {action.icon}
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="lg:col-span-3">
           {eventsLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="border-4 rounded-full w-7 h-7 border-brand-600 border-t-transparent animate-spin" />
@@ -116,7 +139,7 @@ export default function AdminDashboard() {
                   <h2 className="mb-3 text-xs font-semibold tracking-wide uppercase text-slate-500">
                     Upcoming Events
                   </h2>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     {upcoming.slice(0, 4).map(event => (
                       <EventCard
                         key={event.id}
@@ -136,13 +159,13 @@ export default function AdminDashboard() {
                   )}
                 </section>
               )}
-
+              
               {past.length > 0 && (
                 <section>
-                  <h2 className="mb-3 text-xs font-semibold tracking-wide uppercase text-slate-500">
+                  <h2 className="mt-8 mb-3 text-xs font-semibold tracking-wide uppercase text-slate-500">
                     Past Events
                   </h2>
-                  <div className="grid grid-cols-1 gap-4 opacity-75 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 opacity-75 sm:grid-cols-3">
                     {past.slice(0, 2).map(event => (
                       <EventCard
                         key={event.id}
@@ -171,35 +194,6 @@ export default function AdminDashboard() {
               )}
             </>
           )}
-        </div>
-
-        <div className="space-y-4">
-          <div className="p-5 bg-white border shadow-sm rounded-xl border-slate-200">
-            <h3 className="mb-4 text-sm font-semibold text-slate-900">Quick Actions</h3>
-            <div className="space-y-2">
-              {[
-                { label: 'Create Event', icon: <Plus className="w-4 h-4" />, path: '/admin/events/new', color: 'bg-brand-600 text-white hover:bg-brand-700' },
-                { label: 'View All Events', icon: <Calendar className="w-4 h-4" />, path: '/admin/events', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
-                { label: 'All Email Logs', icon: <Mail className="w-4 h-4" />, path: '/admin/emails', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
-                { label: 'My Invitations', icon: <Users className="w-4 h-4" />, path: '/admin/invitee-dashboard', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
-              ].map(action => (
-                <button
-                  key={action.path}
-                  onClick={() => navigate(action.path)}
-                  className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${action.color}`}
-                >
-                  {action.icon}
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="p-5 bg-white border shadow-sm rounded-xl border-slate-200">
-            <h3 className="mb-3 text-sm font-semibold text-slate-900">Email Activity</h3>
-            <div className="mb-1 text-3xl font-bold text-slate-900">{emailLogs.length}</div>
-            <p className="text-sm text-slate-500">emails sent across all events</p>
-          </div>
         </div>
       </div>
     </div>

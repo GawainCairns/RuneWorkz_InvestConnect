@@ -1,5 +1,5 @@
 import { ArrowLeft, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../../contexts/EventContext';
 import FormField from './FormField';
@@ -9,7 +9,7 @@ const inputClass =
 
 export default function EventForm() {
   const navigate = useNavigate();
-  const { createEvent } = useEvents();
+  const { createEvent, brands, fetchBrands, createBrand } = useEvents();
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -30,6 +30,10 @@ export default function EventForm() {
     setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
+  const [showAddBrand, setShowAddBrand] = useState(false);
+  const [newBrandName, setNewBrandName] = useState('');
+  const [newBrandDescription, setNewBrandDescription] = useState('');
+
   const validate = () => {
     const errs: Record<string, string> = {};
     if (!form.brand.trim()) errs.brand = 'Brand is required';
@@ -38,8 +42,8 @@ export default function EventForm() {
     if (!form.start_time) errs.start_time = 'Start time is required';
     if (!form.end_time) errs.end_time = 'End time is required';
     if (!form.location.trim()) errs.location = 'Location is required';
-    if (form.price !== '' && isNaN(Number(form.price))) errs.price = 'Price must be a number';
-    if (form.capacity !== '' && isNaN(Number(form.capacity))) errs.capacity = 'Capacity must be a number';
+    if (form.price === '' || isNaN(Number(form.price)) || Number(form.price) <= 0) errs.price = 'Price is required and must be greater than 0';
+    if (form.capacity === '' || isNaN(Number(form.capacity)) || Number(form.capacity) <= 0) errs.capacity = 'Capacity is required and must be greater than 0';
     return errs;
   };
 
@@ -53,15 +57,16 @@ export default function EventForm() {
     setSubmitting(true);
     try {
       const event = await createEvent({
-        brand: form.brand.trim(),
+        // send the selected brand id (string) so the context can resolve/create the brand
+        brand: form.brand,
         title: form.title.trim(),
         description: form.description.trim(),
         date: form.date,
         start_time: form.start_time,
         end_time: form.end_time,
         location: form.location.trim(),
-        price: Number(form.price) || 0,
-        capacity: form.capacity ? Number(form.capacity) : null,
+        price: Number(form.price),
+        capacity: Number(form.capacity),
       });
       navigate(`/admin/events/${event.id}`);
     } catch {
@@ -71,44 +76,112 @@ export default function EventForm() {
     }
   };
 
+  useEffect(() => {
+    fetchBrands().catch(() => { });
+  }, [fetchBrands]);
+
+  const handleAddBrand = async () => {
+    if (!newBrandName.trim()) return setErrors(prev => ({ ...prev, brand: 'Brand name is required' }));
+    try {
+      const created = await createBrand({ name: newBrandName.trim(), description: newBrandDescription.trim() });
+      if (created && (created as any).id) {
+        setForm(prev => ({ ...prev, brand: String((created as any).id) }));
+      }
+      setNewBrandName('');
+      setNewBrandDescription('');
+      setShowAddBrand(false);
+    } catch (err) {
+      setErrors(prev => ({ ...prev, brand: 'Failed to create brand' }));
+    }
+  };
+
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-2xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
       <button
         onClick={() => navigate('/admin/events')}
-        className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-6 transition-colors"
+        className="flex items-center gap-2 mb-6 text-sm transition-colors text-slate-600 hover:text-slate-900"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Events
       </button>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+      <div className="bg-white border shadow-sm rounded-xl border-slate-200">
         <div className="px-6 py-5 border-b border-slate-100">
           <h1 className="text-xl font-semibold text-slate-900">Create New Event</h1>
-          <p className="text-sm text-slate-500 mt-1">Fill in the details below to create your event.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 py-6 space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <FormField label="Brand" required error={errors.brand}>
-              <input
-                type="text"
-                className={inputClass}
-                placeholder="e.g. Acme Corp"
-                value={form.brand}
-                onChange={e => update('brand', e.target.value)}
-              />
-            </FormField>
-            <FormField label="Title" required error={errors.title}>
-              <input
-                type="text"
-                className={inputClass}
-                placeholder="Event title"
-                value={form.title}
-                onChange={e => update('title', e.target.value)}
-              />
+              <div className="flex items-start gap-3">
+                <select
+                  className={`${inputClass} max-w-full`}
+                  value={form.brand}
+                  onChange={e => update('brand', e.target.value)}
+                >
+                  <option value="">Select a brand</option>
+                  {brands && Object.entries(brands).map(([id, name]) => (
+                    <option key={id} value={id}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setShowAddBrand(prev => !prev)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors bg-white border rounded-lg text-brand-600 border-slate-300 hover:bg-slate-50"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add
+                </button>
+              </div>
+              {showAddBrand && (
+                <div className="mt-3 space-y-2">
+                  <input
+                    type="text"
+                    className={inputClass}
+                    placeholder="Brand name"
+                    value={newBrandName}
+                    onChange={e => setNewBrandName(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    className={inputClass}
+                    placeholder="Short description (optional)"
+                    value={newBrandDescription}
+                    onChange={e => setNewBrandDescription(e.target.value)}
+                  />
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleAddBrand}
+                      className="px-3 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddBrand(false)}
+                      className="px-3 py-2 text-sm font-medium transition-colors bg-white border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </FormField>
           </div>
 
+          <FormField label="Title" required error={errors.title}>
+            <input
+              type="text"
+              className={`${inputClass} resize-none`}
+              placeholder="Event title"
+              value={form.title}
+              onChange={e => update('title', e.target.value)}
+            />
+          </FormField>
+          
           <FormField label="Description" error={errors.description}>
             <textarea
               className={`${inputClass} resize-none`}
@@ -119,7 +192,7 @@ export default function EventForm() {
             />
           </FormField>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <FormField label="Date" required error={errors.date}>
               <input
                 type="date"
@@ -156,11 +229,11 @@ export default function EventForm() {
             />
           </FormField>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <FormField label="Price (USD)" hint="Leave empty or 0 for free" error={errors.price}>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormField label="Price (USD)" required error={errors.price}>
               <input
                 type="number"
-                min="0"
+                min="0.01"
                 step="0.01"
                 className={inputClass}
                 placeholder="0.00"
@@ -168,7 +241,7 @@ export default function EventForm() {
                 onChange={e => update('price', e.target.value)}
               />
             </FormField>
-            <FormField label="Capacity" hint="Leave empty for unlimited" error={errors.capacity}>
+            <FormField label="Capacity" required error={errors.capacity}>
               <input
                 type="number"
                 min="1"
@@ -181,7 +254,7 @@ export default function EventForm() {
           </div>
 
           {errors.submit && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+            <p className="px-4 py-3 text-sm text-red-600 border border-red-200 rounded-lg bg-red-50">
               {errors.submit}
             </p>
           )}
@@ -190,14 +263,14 @@ export default function EventForm() {
             <button
               type="button"
               onClick={() => navigate('/admin/events')}
-              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+              className="px-4 py-2 text-sm font-medium transition-colors bg-white border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-4 h-4" />
               {submitting ? 'Creating...' : 'Create Event'}

@@ -61,7 +61,7 @@ export default function EventCard({
             <span className="inline-block text-xs font-semibold text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full mb-2">
               {event.brand}
             </span>
-            <h3 className="text-base font-semibold text-slate-900 leading-tight">{event.title}</h3>
+            <h3 className="text-base font-semibold leading-tight text-slate-900">{event.title}</h3>
           </div>
           {event.price > 0 && (
             <div className="flex items-center gap-1 text-sm font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg shrink-0">
@@ -72,7 +72,7 @@ export default function EventCard({
         </div>
 
         {event.description && (
-          <p className="text-sm text-slate-500 line-clamp-2 mb-4">{event.description}</p>
+          <p className="mb-4 text-sm text-slate-500 line-clamp-2">{event.description}</p>
         )}
 
         <div className="space-y-1.5">
@@ -94,10 +94,10 @@ export default function EventCard({
       </div>
 
       {shouldShowStats && (
-        <div className="border-t border-slate-100 grid grid-cols-3 divide-x divide-slate-100">
+        <div className="grid grid-cols-3 border-t divide-x border-slate-100 divide-slate-100">
           <div className="px-4 py-3 text-center">
             <div className="text-lg font-bold text-slate-900">{inviteeCount}</div>
-            <div className="text-xs text-slate-500 flex items-center justify-center gap-1">
+            <div className="flex items-center justify-center gap-1 text-xs text-slate-500">
               <Users className="w-3 h-3" />
               Invited
             </div>
