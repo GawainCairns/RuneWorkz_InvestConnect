@@ -33,8 +33,7 @@ export default function EventList() {
     <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Events</h1>
-          <p className="mt-1 text-sm text-slate-500">{events.length} event{events.length !== 1 ? 's' : ''} total</p>
+          <h1 className="text-2xl font-bold text-slate-900">Events — {events.length}</h1>
         </div>
         <button
           onClick={() => navigate('/admin/events/new')}

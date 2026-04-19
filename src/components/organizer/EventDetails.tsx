@@ -29,9 +29,15 @@ export default function EventDetails() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { getEvent } = useEvents();
-  const { invitees, fetchInvitees } = useInvitees();
+  const { invitees, fetchInvitees, addInvitee, addInvitees } = useInvitees();
   const { emailLogs, fetchEmailLogs } = useEmailLogs();
   const [activeTab, setActiveTab] = useState<Tab>('invitees');
+  const [showSingleForm, setShowSingleForm] = useState(false);
+  const [showBatchForm, setShowBatchForm] = useState(false);
+  const [singleFirst, setSingleFirst] = useState('');
+  const [singleLast, setSingleLast] = useState('');
+  const [singleEmail, setSingleEmail] = useState('');
+  const [batchRaw, setBatchRaw] = useState('');
 
   const event = eventId ? getEvent(eventId) : undefined;
 
@@ -183,9 +189,109 @@ export default function EventDetails() {
         </div>
 
         <div className="p-6">
-          {activeTab === 'invitees' && (
-            <InviteeTable eventId={eventId!} invitees={eventInvitees} />
-          )}
+            {activeTab === 'invitees' && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-sm text-slate-600">Manage invitees for this event.</div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowSingleForm(true)}
+                      className="px-3 py-2 text-sm font-medium bg-white border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50"
+                    >
+                      Add Invitee
+                    </button>
+                    <button
+                      onClick={() => setShowBatchForm(true)}
+                      className="px-3 py-2 text-sm font-medium text-white rounded-lg bg-brand-600 hover:bg-brand-700"
+                    >
+                      Add Invitees (Batch)
+                    </button>
+                  </div>
+                </div>
+
+                <InviteeTable eventId={eventId!} invitees={eventInvitees} />
+              </div>
+            )}
+              {showSingleForm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/40" onClick={() => setShowSingleForm(false)} />
+                  <div className="relative w-full max-w-md p-6 bg-white shadow-lg rounded-xl">
+                    <h3 className="mb-3 text-lg font-semibold">Add Invitee</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm text-slate-600">First name</label>
+                        <input value={singleFirst} onChange={e => setSingleFirst(e.target.value)} className="block w-full px-3 py-2 mt-1 border rounded-md" />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-slate-600">Last name</label>
+                        <input value={singleLast} onChange={e => setSingleLast(e.target.value)} className="block w-full px-3 py-2 mt-1 border rounded-md" />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-slate-600">Email</label>
+                        <input value={singleEmail} onChange={e => setSingleEmail(e.target.value)} className="block w-full px-3 py-2 mt-1 border rounded-md" />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                      <button onClick={() => setShowSingleForm(false)} className="px-3 py-2 text-sm bg-white border rounded-lg">Cancel</button>
+                      <button
+                        onClick={async () => {
+                          if (!eventId) return;
+                          try {
+                            await addInvitee({
+                              event_id: String(eventId),
+                              email: singleEmail.trim(),
+                              firstname: singleFirst.trim(),
+                              lastname: singleLast.trim(),
+                              rsvp_status: 'pending',
+                              payment_status: 'unpaid',
+                            } as any);
+                          } finally {
+                            setSingleFirst('');
+                            setSingleLast('');
+                            setSingleEmail('');
+                            setShowSingleForm(false);
+                          }
+                        }}
+                        className="px-3 py-2 text-sm text-white rounded-lg bg-brand-600"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {showBatchForm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/40" onClick={() => setShowBatchForm(false)} />
+                  <div className="relative w-full max-w-2xl p-6 bg-white shadow-lg rounded-xl">
+                    <h3 className="mb-3 text-lg font-semibold">Add Invitees (Batch)</h3>
+                    <p className="mb-3 text-sm text-slate-600">Enter one entry per line using comma-separated fields: <span className="font-mono">firstname,lastname,email</span></p>
+                    <textarea value={batchRaw} onChange={e => setBatchRaw(e.target.value)} rows={8} className="w-full p-3 border rounded-md" placeholder="John,Doe,john@example.com\nJane,Smith,jane@example.com" />
+                    <div className="flex justify-end gap-2 mt-4">
+                      <button onClick={() => setShowBatchForm(false)} className="px-3 py-2 text-sm bg-white border rounded-lg">Cancel</button>
+                      <button
+                        onClick={async () => {
+                          if (!eventId) return;
+                          try {
+                            const lines = batchRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+                            const items = lines.map(l => {
+                              const [firstname = '', lastname = '', email = ''] = l.split(',').map(p => p.trim());
+                              return { event_id: String(eventId), firstname, lastname, email, dietary: '', rsvp_status: 'pending', payment_status: 'unpaid' };
+                            });
+                            if (items.length > 0) await addInvitees(items as any);
+                          } finally {
+                            setBatchRaw('');
+                            setShowBatchForm(false);
+                          }
+                        }}
+                        className="px-3 py-2 text-sm text-white rounded-lg bg-brand-600"
+                      >
+                        Save All
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
           {activeTab === 'emails' && (
             <EmailLogTable emailLogs={eventEmails} />
           )}

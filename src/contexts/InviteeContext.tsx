@@ -57,25 +57,102 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addInvitee = useCallback(async (data: Omit<Invitee, 'id' | 'invite_token' | 'created_at'>): Promise<Invitee> => {
-    const newInvitee: Invitee = {
-      ...data,
-      id: crypto.randomUUID(),
-      invite_token: crypto.randomUUID(),
-      created_at: new Date().toISOString(),
-    };
-    setInvitees(prev => [...prev, newInvitee]);
-    return newInvitee;
+    try {
+      const payload = {
+        eventId: Number(data.event_id),
+        firstname: data.firstname,
+        surname: data.lastname,
+        email: data.email,
+        dietary: data.dietary || undefined,
+        rsvpStatus: data.rsvp_status || undefined,
+        paymentStatus: data.payment_status || undefined,
+      } as any;
+      const res = await inviteeService.create(payload);
+      const apiInv = (res && (res as any).invitee) as ApiInvitee;
+      const newInvitee: Invitee = {
+        id: String(apiInv.id),
+        event_id: String(apiInv.eventId),
+        email: apiInv.email || '',
+        firstname: apiInv.firstname || '',
+        lastname: apiInv.surname || '',
+        dietary: apiInv.dietary || '',
+        rsvp_status: (apiInv.rsvpStatus as any) || 'pending',
+        payment_status: (apiInv.paymentStatus as any) || 'unpaid',
+        invite_token: (apiInv.inviteCode as any) || '',
+        created_at: apiInv.createdAt || new Date().toISOString(),
+      };
+      setInvitees(prev => [...prev, newInvitee]);
+      return newInvitee;
+    } catch (err) {
+      // fallback to local optimistic add on error
+      const newInvitee: Invitee = {
+        ...data,
+        id: crypto.randomUUID(),
+        invite_token: crypto.randomUUID(),
+        created_at: new Date().toISOString(),
+      };
+      setInvitees(prev => [...prev, newInvitee]);
+      return newInvitee;
+    }
   }, []);
 
   const addInvitees = useCallback(async (data: Omit<Invitee, 'id' | 'invite_token' | 'created_at'>[]): Promise<Invitee[]> => {
-    const newInvitees: Invitee[] = data.map(d => ({
-      ...d,
-      id: crypto.randomUUID(),
-      invite_token: crypto.randomUUID(),
-      created_at: new Date().toISOString(),
-    }));
-    setInvitees(prev => [...prev, ...newInvitees]);
-    return newInvitees;
+    try {
+      const payloads = data.map(d => ({
+        eventId: Number(d.event_id),
+        firstname: d.firstname,
+        surname: d.lastname,
+        email: d.email,
+        dietary: d.dietary || undefined,
+        rsvpStatus: d.rsvp_status || undefined,
+        paymentStatus: d.payment_status || undefined,
+      }));
+      const res = await inviteeService.createBatch(payloads as any);
+      const results = (res && (res as any).results) || [];
+      const created: Invitee[] = results
+        .filter((r: any) => r.success && r.invitee)
+        .map((r: any) => {
+          const i = r.invitee as ApiInvitee;
+          return {
+            id: String(i.id),
+            event_id: String(i.eventId),
+            email: i.email || '',
+            firstname: i.firstname || '',
+            lastname: i.surname || '',
+            dietary: i.dietary || '',
+            rsvp_status: (i.rsvpStatus as any) || 'pending',
+            payment_status: (i.paymentStatus as any) || 'unpaid',
+            invite_token: (i.inviteCode as any) || '',
+            created_at: i.createdAt || new Date().toISOString(),
+          } as Invitee;
+        });
+      // if some failed, fallback create local entries for them
+      const failedPayloads = results.filter((r: any) => !r.success).map((r: any) => r.item as any);
+      const fallback: Invitee[] = failedPayloads.map((p: any) => ({
+        id: crypto.randomUUID(),
+        event_id: String(p.eventId || (data[0] && data[0].event_id)),
+        email: p.email || '',
+        firstname: p.firstname || '',
+        lastname: p.surname || '',
+        dietary: p.dietary || '',
+        rsvp_status: (p.rsvpStatus as any) || 'pending',
+        payment_status: (p.paymentStatus as any) || 'unpaid',
+        invite_token: crypto.randomUUID(),
+        created_at: new Date().toISOString(),
+      }));
+      const newInvitees = [...created, ...fallback];
+      setInvitees(prev => [...prev, ...newInvitees]);
+      return newInvitees;
+    } catch (err) {
+      const newInvitees: Invitee[] = data.map(d => ({
+        ...d,
+        id: crypto.randomUUID(),
+        invite_token: crypto.randomUUID(),
+        created_at: new Date().toISOString(),
+      }));
+      setInvitees(prev => [...prev, ...newInvitees]);
+      return newInvitees;
+    }
   }, []);
 
   const updateInvitee = useCallback(async (id: string, data: Partial<Invitee>): Promise<Invitee> => {
