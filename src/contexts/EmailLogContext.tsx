@@ -1,4 +1,6 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
+import { emailLogService } from '../services/emailLogService';
+import type { ApiEmailLog } from '../types/api';
 import type { EmailLog } from '../types/organizer';
 
 interface EmailLogContextValue {
@@ -20,7 +22,24 @@ export function EmailLogProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      setEmailLogs([]);
+      const params: Record<string, string | number | undefined> = {};
+      if (_eventId) {
+        const n = Number(_eventId);
+        if (!Number.isNaN(n)) params.eventId = n;
+      }
+      const res = await emailLogService.getAll(params as any);
+      const apiLogs: ApiEmailLog[] = res.emailLogs || [];
+      const mapped = apiLogs.map(l => ({
+        id: String(l.id),
+        event_id: String(l.eventId),
+        invitee_id: l.inviteeId !== null ? String(l.inviteeId) : null,
+        to_email: l.to,
+        subject: l.subject,
+        body: l.body,
+        type: 'other' as const,
+        sent_at: l.timestamp || (l as any).createdAt || new Date().toISOString(),
+      }));
+      setEmailLogs(mapped);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch email logs');
     } finally {

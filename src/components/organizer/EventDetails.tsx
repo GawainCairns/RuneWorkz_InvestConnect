@@ -47,6 +47,11 @@ export default function EventDetails() {
     }
   }, [eventId, fetchInvitees]);
 
+  // Populate email logs for this event when the page loads
+  useEffect(() => {
+    if (eventId) fetchEmailLogs(eventId);
+  }, [eventId, fetchEmailLogs]);
+
   useEffect(() => {
     if (activeTab === 'emails' && eventId) {
       fetchEmailLogs(eventId);
