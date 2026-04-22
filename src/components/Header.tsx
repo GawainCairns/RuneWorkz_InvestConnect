@@ -1,4 +1,4 @@
-import { ChevronDown, LogOut, TrendingUp, User } from 'lucide-react';
+import { ChevronDown, LogOut, TrendingUp, User, Home, Mail, Calendar, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -73,18 +73,34 @@ export default function Header() {
                   <User className="w-4 h-4 text-gray-400" />
                   Profile
                 </button>
+                <button
+                  onClick={() => { setMenuOpen(false); navigate('/admin'); }}
+                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <Home className="w-4 h-4 text-gray-400" />
+                  Dashboard
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); navigate('/admin/invitee-dashboard'); }}
+                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <Mail className="w-4 h-4 text-gray-400" />
+                  My Invitations
+                </button>
                 {hasAdminRole(profile) && (
                   <>
                     <button
                       onClick={() => { setMenuOpen(false); navigate('/admin/events'); }}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
+                      <Calendar className="w-4 h-4 text-gray-400" />
                       Events
                     </button>
                     <button
                       onClick={() => { setMenuOpen(false); navigate('/admin/emails'); }}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
+                      <FileText className="w-4 h-4 text-gray-400" />
                       Email Logs
                     </button>
                   </>
