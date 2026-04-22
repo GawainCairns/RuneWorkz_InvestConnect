@@ -22,7 +22,7 @@ export default function PaymentPage() {
   if (!invitee || !event) {
     return (
       <AttendeeLayout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-screen">
           <p className="text-slate-500">Invitation not found.</p>
         </div>
       </AttendeeLayout>
@@ -38,9 +38,12 @@ export default function PaymentPage() {
     setSubmitting(true);
     try {
       if (paymentMethod === 'card') {
-        await updateInvitee(invitee.id, { payment_status: 'paid' });
+        // save selection; actual payment will be processed later
+        await updateInvitee(invitee.id, { payment_status: 'unpaid' });
         navigate(`/rsvp/${token}/confirmation`);
       } else {
+        // record that an invoice was requested
+        await updateInvitee(invitee.id, { payment_status: 'invoice-issued' });
         navigate(`/rsvp/${token}/invoice`);
       }
     } finally {
@@ -50,22 +53,22 @@ export default function PaymentPage() {
 
   return (
     <AttendeeLayout>
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
         <div className="w-full max-w-md">
-          <div className="text-center mb-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Step 3 of 4</span>
+          <div className="mb-2 text-center">
+            <span className="text-xs font-semibold tracking-widest uppercase text-slate-400">Step 3 of 4</span>
           </div>
-          <div className="h-1 w-full bg-slate-200 rounded-full mb-8 overflow-hidden">
-            <div className="h-1 bg-brand-600 rounded-full" style={{ width: '75%' }} />
+          <div className="w-full h-1 mb-8 overflow-hidden rounded-full bg-slate-200">
+            <div className="h-1 rounded-full bg-brand-600" style={{ width: '75%' }} />
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-8">
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-slate-900 mb-1">Payment</h1>
-              <p className="text-slate-500 text-sm">Choose how you'd like to pay</p>
+          <div className="p-8 bg-white border shadow-lg rounded-xl border-slate-200">
+            <div className="mb-6 text-center">
+              <h1 className="mb-1 text-2xl font-bold text-slate-900">Payment</h1>
+              <p className="text-sm text-slate-500">Choose how you'd like to pay</p>
             </div>
 
-            <div className="bg-slate-50 rounded-xl border border-slate-200 px-5 py-4 mb-6 flex items-center justify-between">
+            <div className="flex items-center justify-between px-5 py-4 mb-6 border bg-slate-50 rounded-xl border-slate-200">
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Amount due</p>
                 <p className="text-2xl font-bold text-slate-900">${event.price.toFixed(2)}</p>
@@ -76,7 +79,7 @@ export default function PaymentPage() {
               </div>
             </div>
 
-            <div className="space-y-3 mb-6">
+            <div className="mb-6 space-y-3">
               {[
                 {
                   id: 'card' as PaymentMethod,
@@ -121,7 +124,7 @@ export default function PaymentPage() {
                           isSelected ? 'border-brand-600 bg-brand-600' : 'border-slate-300'
                         }`}
                       >
-                        {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                        {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
                       </div>
                     </div>
                   </button>
@@ -132,7 +135,7 @@ export default function PaymentPage() {
             <button
               onClick={handleContinue}
               disabled={submitting}
-              className="w-full py-3 bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 disabled:opacity-50 transition-colors"
+              className="w-full py-3 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700 disabled:opacity-50"
             >
               {submitting
                 ? 'Processing...'

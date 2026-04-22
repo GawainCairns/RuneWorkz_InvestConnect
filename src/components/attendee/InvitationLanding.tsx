@@ -77,7 +77,7 @@ export default function InvitationLanding() {
   if (!token) {
     return (
       <AttendeeLayout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-screen">
           <p className="text-slate-500">Invalid invitation link.</p>
         </div>
       </AttendeeLayout>
@@ -87,10 +87,10 @@ export default function InvitationLanding() {
   if (!invitee || !event) {
     return (
       <AttendeeLayout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-slate-500 text-sm">Loading your invitation...</p>
+            <div className="w-8 h-8 mx-auto mb-4 border-4 rounded-full border-brand-600 border-t-transparent animate-spin" />
+            <p className="text-sm text-slate-500">Loading your invitation...</p>
           </div>
         </div>
       </AttendeeLayout>
@@ -99,29 +99,29 @@ export default function InvitationLanding() {
 
   return (
     <AttendeeLayout>
-      <div className="bg-gradient-to-br from-brand-700 via-brand-600 to-brand-800 text-white py-16 px-4">
+      <div className="px-4 py-16 text-white bg-gradient-to-br from-brand-700 via-brand-600 to-brand-800">
         <div className="max-w-2xl mx-auto text-center">
-          <span className="inline-block text-xs font-semibold tracking-widest uppercase text-brand-200 mb-3">
+          <span className="inline-block mb-3 text-xs font-semibold tracking-widest uppercase text-brand-200">
             {event.brand}
           </span>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-4 leading-tight">{event.title}</h1>
+          <h1 className="mb-4 text-3xl font-bold leading-tight sm:text-4xl">{event.title}</h1>
           {event.description && (
-            <p className="text-brand-100 text-base leading-relaxed max-w-lg mx-auto">{event.description}</p>
+            <p className="max-w-lg mx-auto text-base leading-relaxed text-brand-100">{event.description}</p>
           )}
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 -mt-6">
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
-            <div className="px-5 py-4 flex items-center gap-3">
+      <div className="max-w-2xl px-4 mx-auto -mt-6">
+        <div className="overflow-hidden bg-white border shadow-lg rounded-xl border-slate-200">
+          <div className="grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-y-0 sm:divide-x divide-slate-100">
+            <div className="flex items-center gap-3 px-5 py-4">
               <Calendar className="w-5 h-5 text-brand-500 shrink-0" />
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Date</p>
                 <p className="text-sm font-semibold text-slate-900">{formatEventDate(event.date)}</p>
               </div>
             </div>
-            <div className="px-5 py-4 flex items-center gap-3">
+            <div className="flex items-center gap-3 px-5 py-4">
               <Clock className="w-5 h-5 text-brand-500 shrink-0" />
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Time</p>
@@ -130,7 +130,7 @@ export default function InvitationLanding() {
                 </p>
               </div>
             </div>
-            <div className="px-5 py-4 flex items-center gap-3">
+            <div className="flex items-center gap-3 px-5 py-4">
               <MapPin className="w-5 h-5 text-brand-500 shrink-0" />
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Location</p>
@@ -140,7 +140,7 @@ export default function InvitationLanding() {
           </div>
 
           {event.price > 0 && (
-            <div className="border-t border-slate-100 px-5 py-3 flex items-center gap-2 bg-emerald-50">
+            <div className="flex items-center gap-2 px-5 py-3 border-t border-slate-100 bg-emerald-50">
               <DollarSign className="w-4 h-4 text-emerald-600" />
               <span className="text-sm font-semibold text-emerald-700">
                 Ticket price: ${event.price.toFixed(2)}
@@ -149,7 +149,7 @@ export default function InvitationLanding() {
           )}
         </div>
 
-        <div className="mt-6 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+        <div className="p-6 mt-6 bg-white border shadow-sm rounded-xl border-slate-200">
           {needsDetails ? (
             <>
               <div className="flex items-center gap-2 mb-4">
@@ -195,7 +195,7 @@ export default function InvitationLanding() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-3 bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 disabled:opacity-50 transition-colors"
+                  className="w-full py-3 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700 disabled:opacity-50"
                 >
                   {submitting ? 'Saving...' : 'Continue to RSVP →'}
                 </button>
@@ -204,7 +204,7 @@ export default function InvitationLanding() {
           ) : (
             <>
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center shrink-0">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-100 shrink-0">
                   <User className="w-5 h-5 text-brand-700" />
                 </div>
                 <div>
@@ -216,7 +216,7 @@ export default function InvitationLanding() {
               </div>
               <button
                 onClick={handleProceed}
-                className="w-full py-3 bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 transition-colors"
+                className="w-full py-3 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
               >
                 Continue to RSVP →
               </button>
@@ -224,7 +224,7 @@ export default function InvitationLanding() {
           )}
         </div>
 
-        <p className="text-center text-xs text-slate-400 mt-4 pb-8">
+        <p className="pb-8 mt-4 text-xs text-center text-slate-400">
           This invitation was sent to {invitee.email}. Please do not share this link.
         </p>
       </div>

@@ -35,7 +35,7 @@ export default function RSVPPage() {
   if (!invitee || !event) {
     return (
       <AttendeeLayout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-screen">
           <p className="text-slate-500">Invitation not found.</p>
         </div>
       </AttendeeLayout>
@@ -44,22 +44,22 @@ export default function RSVPPage() {
 
   return (
     <AttendeeLayout>
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
         <div className="w-full max-w-md">
-          <div className="text-center mb-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Step 1 of 4</span>
+          <div className="mb-2 text-center">
+            <span className="text-xs font-semibold tracking-widest uppercase text-slate-400">Step 1 of 4</span>
           </div>
-          <div className="h-1 w-full bg-slate-200 rounded-full mb-8 overflow-hidden">
-            <div className="h-1 bg-brand-600 rounded-full" style={{ width: '25%' }} />
+          <div className="w-full h-1 mb-8 overflow-hidden rounded-full bg-slate-200">
+            <div className="h-1 rounded-full bg-brand-600" style={{ width: '25%' }} />
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-8">
-            <div className="text-center mb-8">
+          <div className="p-8 bg-white border shadow-lg rounded-xl border-slate-200">
+            <div className="mb-8 text-center">
               <span className="text-xs font-semibold text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full">
                 {event.brand}
               </span>
-              <h1 className="text-2xl font-bold text-slate-900 mt-3 mb-1">{event.title}</h1>
-              <p className="text-slate-500 text-sm">
+              <h1 className="mt-3 mb-1 text-2xl font-bold text-slate-900">{event.title}</h1>
+              <p className="text-sm text-slate-500">
                 Hi {invitee.firstname}, will you be attending?
               </p>
             </div>
@@ -80,23 +80,23 @@ export default function RSVPPage() {
               <button
                 onClick={() => handleRSVP('yes')}
                 disabled={submitting}
-                className="flex flex-col items-center gap-3 py-6 rounded-xl border-2 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-400 transition-all disabled:opacity-50 group"
+                className="flex flex-col items-center gap-3 py-6 transition-all border-2 rounded-xl border-emerald-300 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-400 disabled:opacity-50 group"
               >
-                <ThumbsUp className="w-8 h-8 text-emerald-600 group-hover:scale-110 transition-transform" />
+                <ThumbsUp className="w-8 h-8 transition-transform text-emerald-600 group-hover:scale-110" />
                 <span className="text-base font-bold text-emerald-700">Yes, I'll attend</span>
               </button>
               <button
                 onClick={() => handleRSVP('no')}
                 disabled={submitting}
-                className="flex flex-col items-center gap-3 py-6 rounded-xl border-2 border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all disabled:opacity-50 group"
+                className="flex flex-col items-center gap-3 py-6 transition-all border-2 rounded-xl border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 disabled:opacity-50 group"
               >
-                <ThumbsDown className="w-8 h-8 text-slate-400 group-hover:scale-110 transition-transform" />
+                <ThumbsDown className="w-8 h-8 transition-transform text-slate-400 group-hover:scale-110" />
                 <span className="text-base font-bold text-slate-500">No, I can't make it</span>
               </button>
             </div>
           </div>
 
-          <p className="text-center text-xs text-slate-400 mt-6">
+          <p className="mt-6 text-xs text-center text-slate-400">
             You can change your RSVP by using the original invite link.
           </p>
         </div>

@@ -161,13 +161,44 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
       prev.map(inv => {
         if (inv.id === id) {
           updated = { ...inv, ...data };
-          return updated;
+          return updated as Invitee;
         }
         return inv;
       })
     );
     if (!updated) throw new Error('Invitee not found');
-    return updated;
+
+    // attempt to persist to backend; map fields to API payload shape
+    try {
+      const payload: any = {};
+      if (data.rsvp_status !== undefined) payload.rsvpStatus = data.rsvp_status;
+      if (data.dietary !== undefined) payload.dietary = data.dietary;
+      if (data.payment_status !== undefined) payload.paymentStatus = data.payment_status;
+      if ((data as any).firstname !== undefined) payload.firstname = (data as any).firstname;
+      if ((data as any).lastname !== undefined) payload.surname = (data as any).lastname;
+      if ((data as any).email !== undefined) payload.email = (data as any).email;
+
+      const res = await inviteeService.update(Number(id), payload);
+      const apiInv = (res && (res as any).invitee) as ApiInvitee;
+      const merged: Invitee = {
+        id: String(apiInv.id),
+        event_id: String(apiInv.eventId),
+        email: apiInv.email || updated.email,
+        firstname: apiInv.firstname || updated.firstname,
+        lastname: apiInv.surname || updated.lastname,
+        dietary: apiInv.dietary || updated.dietary,
+        rsvp_status: (apiInv.rsvpStatus as any) || updated.rsvp_status,
+        payment_status: (apiInv.paymentStatus as any) || updated.payment_status,
+        invite_token: (apiInv.inviteCode as any) || updated.invite_token,
+        created_at: apiInv.createdAt || updated.created_at,
+        invoice: (updated as any).invoice,
+      };
+      setInvitees(prev => prev.map(inv => (inv.id === id ? merged : inv)));
+      return merged;
+    } catch (err) {
+      // If backend fails, return the optimistic updated object
+      return updated as Invitee;
+    }
   }, []);
 
   const updateInviteeLocal = useCallback((id: string, data: Partial<Invitee>) => {
@@ -177,9 +208,12 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const markPaid = useCallback(async (id: string) => {
-    setInvitees(prev =>
-      prev.map(inv => (inv.id === id ? { ...inv, payment_status: 'paid' } : inv))
-    );
+    setInvitees(prev => prev.map(inv => (inv.id === id ? { ...inv, payment_status: 'paid' } : inv)));
+    try {
+      await inviteeService.updatePayment(Number(id), 'paid');
+    } catch (err) {
+      // ignore backend error; local state already updated optimistically
+    }
   }, []);
 
   const getInviteeByToken = useCallback(

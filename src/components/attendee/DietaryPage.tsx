@@ -30,7 +30,7 @@ export default function DietaryPage() {
   if (!invitee || !event) {
     return (
       <AttendeeLayout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-screen">
           <p className="text-slate-500">Invitation not found.</p>
         </div>
       </AttendeeLayout>
@@ -44,19 +44,19 @@ export default function DietaryPage() {
 
   return (
     <AttendeeLayout>
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
         <div className="w-full max-w-md">
-          <div className="text-center mb-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Step 2 of 4</span>
+          <div className="mb-2 text-center">
+            <span className="text-xs font-semibold tracking-widest uppercase text-slate-400">Step 2 of 4</span>
           </div>
-          <div className="h-1 w-full bg-slate-200 rounded-full mb-8 overflow-hidden">
-            <div className="h-1 bg-brand-600 rounded-full" style={{ width: '50%' }} />
+          <div className="w-full h-1 mb-8 overflow-hidden rounded-full bg-slate-200">
+            <div className="h-1 rounded-full bg-brand-600" style={{ width: '50%' }} />
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-8">
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-slate-900 mb-1">Dietary Requirements</h1>
-              <p className="text-slate-500 text-sm">
+          <div className="p-8 bg-white border shadow-lg rounded-xl border-slate-200">
+            <div className="mb-6 text-center">
+              <h1 className="mb-1 text-2xl font-bold text-slate-900">Dietary Requirements</h1>
+              <p className="text-sm text-slate-500">
                 Let us know if you have any dietary needs.
               </p>
             </div>
@@ -76,7 +76,7 @@ export default function DietaryPage() {
                   >
                     <span>{option}</span>
                     {isSelected && (
-                      <span className="w-5 h-5 rounded-full bg-brand-600 flex items-center justify-center shrink-0">
+                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-brand-600 shrink-0">
                         <Check className="w-3 h-3 text-white" />
                       </span>
                     )}
@@ -88,7 +88,7 @@ export default function DietaryPage() {
             <button
               onClick={handleContinue}
               disabled={!selected}
-              className="mt-6 w-full py-3 bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-3 mt-6 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Continue →
             </button>

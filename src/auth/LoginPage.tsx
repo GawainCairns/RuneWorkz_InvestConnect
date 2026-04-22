@@ -5,7 +5,7 @@ import { useAlert } from '../contexts/AlertContext';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
-  const { login, token, profile } = useAuth();
+  const { login, token } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
 

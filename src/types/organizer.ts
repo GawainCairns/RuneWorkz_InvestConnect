@@ -32,7 +32,8 @@ export interface Invitee {
   firstname: string;
   lastname: string;
   dietary: string;
-  rsvp_status: 'pending' | 'yes' | 'no';
+  // accept both older 'yes'/'no' and attendee-facing 'confirmed'/'declined'
+  rsvp_status: 'pending' | 'yes' | 'no' | 'confirmed' | 'declined';
   payment_status: 'unpaid' | 'paid' | 'invoice-issued';
   invite_token: string;
   invoice?: Invoice;

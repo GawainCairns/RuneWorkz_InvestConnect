@@ -35,7 +35,7 @@ export default function InvoiceForm() {
   if (!invitee || !event) {
     return (
       <AttendeeLayout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-screen">
           <p className="text-slate-500">Invitation not found.</p>
         </div>
       </AttendeeLayout>
@@ -97,18 +97,18 @@ export default function InvoiceForm() {
 
   return (
     <AttendeeLayout>
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
         <div className="w-full max-w-md">
-          <div className="text-center mb-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Step 3 of 4</span>
+          <div className="mb-2 text-center">
+            <span className="text-xs font-semibold tracking-widest uppercase text-slate-400">Step 3 of 4</span>
           </div>
-          <div className="h-1 w-full bg-slate-200 rounded-full mb-8 overflow-hidden">
-            <div className="h-1 bg-brand-600 rounded-full" style={{ width: '75%' }} />
+          <div className="w-full h-1 mb-8 overflow-hidden rounded-full bg-slate-200">
+            <div className="h-1 rounded-full bg-brand-600" style={{ width: '75%' }} />
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-8">
+          <div className="p-8 bg-white border shadow-lg rounded-xl border-slate-200">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center shrink-0">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-brand-100 shrink-0">
                 <FileText className="w-5 h-5 text-brand-700" />
               </div>
               <div>
@@ -117,7 +117,7 @@ export default function InvoiceForm() {
               </div>
             </div>
 
-            <div className="bg-slate-50 rounded-lg border border-slate-200 px-4 py-3 mb-6 flex justify-between items-center">
+            <div className="flex items-center justify-between px-4 py-3 mb-6 border rounded-lg bg-slate-50 border-slate-200">
               <span className="text-sm text-slate-600">{event.title}</span>
               <span className="text-base font-bold text-slate-900">${event.price.toFixed(2)}</span>
             </div>
@@ -172,7 +172,7 @@ export default function InvoiceForm() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3 bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 disabled:opacity-50 transition-colors mt-2"
+                className="w-full py-3 mt-2 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700 disabled:opacity-50"
               >
                 {submitting ? 'Generating...' : 'Generate Invoice →'}
               </button>
