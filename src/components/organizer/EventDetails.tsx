@@ -41,58 +41,6 @@ export default function EventDetails() {
 
   const event = eventId ? getEvent(eventId) : undefined;
 
-  async function generateDietaryPdfForConfirmed() {
-    if (!event) return;
-    const { jsPDF } = await import('jspdf');
-    const doc = new jsPDF();
-
-    const list = eventInvitees.filter(i => i.rsvp_status === 'yes' || i.rsvp_status === 'confirmed');
-
-    const counts: Record<string, number> = {};
-    for (const inv of list) {
-      const key = (inv.dietary || 'None').trim() || 'None';
-      counts[key] = (counts[key] || 0) + 1;
-    }
-
-    let y = 20;
-    doc.setFontSize(16);
-    doc.text(event.title || 'Event', 14, y);
-    doc.setFontSize(11);
-    y += 8;
-    doc.text(`Date: ${formatDate(event.date)}`, 14, y);
-    y += 8;
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, y);
-    y += 12;
-
-    doc.setFontSize(12);
-    doc.text('Dietary summary:', 14, y);
-    y += 8;
-    for (const [k, v] of Object.entries(counts)) {
-      doc.text(`${k}: ${v}`, 18, y);
-      y += 7;
-      if (y > 280) {
-        doc.addPage();
-        y = 20;
-      }
-    }
-
-    y += 6;
-    doc.text('Invitees:', 14, y);
-    y += 8;
-    for (const inv of list) {
-      const line = `${inv.firstname} ${inv.lastname} — ${inv.email} — ${inv.dietary || 'None'}`;
-      doc.text(line, 14, y);
-      y += 6;
-      if (y > 280) {
-        doc.addPage();
-        y = 20;
-      }
-    }
-
-    const safeTitle = (event.title || 'event').replace(/[^a-z0-9\-_]/gi, '_');
-    doc.save(`${safeTitle}_dietary_confirmed.pdf`);
-  }
-
   useEffect(() => {
     if (eventId) {
       fetchInvitees(eventId);
@@ -251,12 +199,6 @@ export default function EventDetails() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-sm text-slate-600">Manage invitees for this event.</div>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => generateDietaryPdfForConfirmed()}
-                      className="px-3 py-2 text-sm font-medium bg-white border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50"
-                    >
-                      Dietary PDF
-                    </button>
                     <button
                       onClick={() => setShowSingleForm(true)}
                       className="px-3 py-2 text-sm font-medium bg-white border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50"
