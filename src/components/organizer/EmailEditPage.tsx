@@ -1,9 +1,11 @@
 import { ArrowLeft, Eye, RotateCcw, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import type { MouseEvent, KeyboardEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEvents } from '../../contexts/EventContext';
 import type { EventProperties } from '../../types/organizer';
 import FormField from './FormField';
+import { emailService, EmailTemplate } from '../../services/emailService';
 
 const inputClass =
   'w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors';
@@ -46,6 +48,25 @@ export default function EmailEditPage() {
   const [props, setProps] = useState<Omit<EventProperties, 'event_id'>>(defaultProps);
   const [showPreview, setShowPreview] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [remotePreviewHtml, setRemotePreviewHtml] = useState<string | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  const handlePreviewClick = (e: MouseEvent<HTMLDivElement>) => {
+    const target = e.target as Element | null;
+    const anchor = target?.closest ? (target.closest('a') as HTMLAnchorElement | null) : null;
+    if (anchor) {
+      e.preventDefault();
+    }
+  };
+
+  const handlePreviewKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const target = e.target as Element | null;
+    const anchor = target?.closest ? (target.closest('a') as HTMLAnchorElement | null) : null;
+    if (anchor && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+    }
+  };
 
   const event = eventId ? getEvent(eventId) : undefined;
 
@@ -87,6 +108,19 @@ export default function EmailEditPage() {
   }
 
   const previewHtml = buildPreview(event, props);
+
+  useEffect(() => {
+    if (!showPreview || !eventId) return;
+    setRemotePreviewHtml(null);
+    setPreviewError(null);
+    setLoadingPreview(true);
+    const template: EmailTemplate = 'invite';
+    emailService
+      .getEmailPreview(Number(eventId), template)
+      .then(html => setRemotePreviewHtml(html))
+      .catch(err => setPreviewError(String(err?.message ?? err)))
+      .finally(() => setLoadingPreview(false));
+  }, [showPreview, eventId]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -172,11 +206,18 @@ export default function EmailEditPage() {
 
         {showPreview && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Live Preview</p>
-            </div>
             <div className="p-4 overflow-y-auto max-h-[600px]">
-              <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
+              {loadingPreview ? (
+                <p className="text-sm text-slate-500">Loading preview…</p>
+              ) : previewError ? (
+                <div className="text-sm text-red-600">Failed to load preview: {previewError}</div>
+              ) : (
+                <div
+                  onClick={handlePreviewClick}
+                  onKeyDown={handlePreviewKeyDown}
+                  dangerouslySetInnerHTML={{ __html: remotePreviewHtml ?? previewHtml }}
+                />
+              )}
             </div>
           </div>
         )}
