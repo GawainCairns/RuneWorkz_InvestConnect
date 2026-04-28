@@ -6,6 +6,7 @@ import { useEvents } from '../../contexts/EventContext';
 import { useInvitees } from '../../contexts/InviteeContext';
 import EmailLogTable from './EmailLogTable';
 import InviteeTable from './InviteeTable';
+import { generateAttendancePDF, generateDietaryPDF } from '../../services/pdfService';
 
 type Tab = 'invitees' | 'emails';
 
@@ -210,6 +211,18 @@ export default function EventDetails() {
                       className="px-3 py-2 text-sm font-medium text-white rounded-lg bg-brand-600 hover:bg-brand-700"
                     >
                       Add Invitees (Batch)
+                    </button>
+                    <button
+                      onClick={() => generateAttendancePDF(event, eventInvitees)}
+                      className="px-3 py-2 text-sm font-medium bg-white border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50"
+                    >
+                      Attendance PDF
+                    </button>
+                    <button
+                      onClick={() => generateDietaryPDF(event, eventInvitees)}
+                      className="px-3 py-2 text-sm font-medium text-white rounded-lg bg-brand-600 hover:bg-brand-700"
+                    >
+                      Dietary PDF
                     </button>
                   </div>
                 </div>
