@@ -9,22 +9,22 @@ import AttendeeLayout from './AttendeeLayout';
 export default function RSVPPage() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const { getInviteeByToken, updateInvitee, updateInviteeLocal } = useInvitees();
+  const { getInviteeByToken, updateInviteeLocal } = useInvitees();
   const { getEvent } = useEvents();
   const [submitting, setSubmitting] = useState(false);
 
   const invitee = token ? getInviteeByToken(token) : undefined;
   const event = invitee ? getEvent(invitee.event_id) : undefined;
 
-  const handleRSVP = async (choice: 'yes' | 'no') => {
+  const handleRSVP = (choice: 'yes' | 'no') => {
     if (!invitee) return;
     setSubmitting(true);
     try {
       if (choice === 'yes') {
-        updateInviteeLocal(invitee.id, { rsvp_status: 'confirmed' });
+        updateInviteeLocal(invitee.id, { rsvp_status: 'yes' });
         navigate(`/rsvp/${token}/dietary`);
       } else {
-        await updateInvitee(invitee.id, { rsvp_status: 'declined' });
+        updateInviteeLocal(invitee.id, { rsvp_status: 'no' });
         navigate(`/rsvp/${token}/confirmation`);
       }
     } finally {

@@ -1,4 +1,6 @@
 import {
+  AlertCircle,
+  AlertTriangle,
   Calendar,
   CalendarPlus,
   CheckCircle,
@@ -8,23 +10,42 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useEmailLogs } from '../../contexts/EmailLogContext';
 import { useEvents } from '../../contexts/EventContext';
 import { useInvitees } from '../../contexts/InviteeContext';
+import { inviteeService } from '../../services/inviteeService';
 import { buildGoogleCalendarUrl, formatEventDate, formatEventTime } from '../../utils/attendee';
 import AttendeeLayout from './AttendeeLayout';
 
 export default function ConfirmationPage() {
-  const { token } = useParams<{ token: string }>();
-  const { getInviteeByToken, updateInvitee } = useInvitees();
+  const { token: paramToken } = useParams<{ token?: string }>();
+  const [searchParams] = useSearchParams();
+  const paymentStatus = searchParams.get('status') as 'success' | 'cancel' | 'failure' | null;
+
+  // When redirected from payment gateway, recover the token stored before the redirect
+  const token = paramToken ?? (paymentStatus ? (sessionStorage.getItem('payment_token') ?? undefined) : undefined);
+
+  const { getInviteeByToken, updateInviteeLocal } = useInvitees();
   const { getEvent } = useEvents();
   const { logEmail } = useEmailLogs();
+  const navigate = useNavigate();
   const persistedRef = useRef(false);
   const emailedRef = useRef(false);
 
   const invitee = token ? getInviteeByToken(token) : undefined;
   const event = invitee ? getEvent(invitee.event_id) : undefined;
+
+  // On payment redirect, clear stored token and update local state
+  useEffect(() => {
+    if (paymentStatus === 'success') {
+      sessionStorage.removeItem('payment_token');
+      if (invitee) updateInviteeLocal(invitee.id, { payment_status: 'paid' });
+    } else if (paymentStatus === 'cancel' || paymentStatus === 'failure') {
+      sessionStorage.removeItem('payment_token');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentStatus]);
 
   useEffect(() => {
     if (!invitee || !event || persistedRef.current) return;
@@ -32,20 +53,28 @@ export default function ConfirmationPage() {
     if (localStorage.getItem(key)) return;
     persistedRef.current = true;
     localStorage.setItem(key, '1');
-    updateInvitee(invitee.id, {
-      rsvp_status: invitee.rsvp_status,
-      dietary: invitee.dietary,
+    const rsvpStatus = invitee.rsvp_status === 'yes' || invitee.rsvp_status === 'confirmed' ? 'yes' : 'no';
+    inviteeService.updateRsvp(Number(invitee.id), {
+      rsvpStatus,
+      dietary: invitee.dietary || undefined,
+    }).then(res => {
+      updateInviteeLocal(invitee.id, {
+        rsvp_status: (res.invitee.rsvpStatus as any) || rsvpStatus,
+        dietary: res.invitee.dietary || invitee.dietary,
+      });
+    }).catch(() => {
+      // keep optimistic local state on failure
     });
   }, [invitee?.id]);
 
   useEffect(() => {
-    if (!invitee || !event || emailedRef.current) return;
+    if (!invitee || !event || emailedRef.current || paymentStatus) return;
     const key = `rsvp_emailed_${invitee.id}`;
     if (localStorage.getItem(key)) return;
     emailedRef.current = true;
     localStorage.setItem(key, '1');
 
-    const isConfirmed = invitee.rsvp_status === 'confirmed';
+    const isConfirmed = invitee.rsvp_status === 'yes' || invitee.rsvp_status === 'confirmed';
     logEmail({
       event_id: event.id,
       invitee_id: invitee.id,
@@ -60,6 +89,116 @@ export default function ConfirmationPage() {
     });
   }, [invitee?.id]);
 
+  // ── Payment gateway redirect ────────────────────────────────────────────────
+  if (paymentStatus) {
+    const calendarUrl = event ? buildGoogleCalendarUrl(event) : undefined;
+
+    const statusConfig = (() => {
+      if (paymentStatus === 'success') {
+        return {
+          icon: <CheckCircle className="mx-auto mb-3 w-14 h-14 text-emerald-500" />,
+          badge: 'bg-emerald-100 text-emerald-700',
+          badgeLabel: 'Payment Confirmed',
+          heading: 'Payment successful!',
+          message: invitee
+            ? `Your payment for ${event?.title} has been processed. A receipt has been sent to ${invitee.email}.`
+            : 'Your payment has been processed successfully.',
+          showCalendar: true,
+        };
+      }
+      if (paymentStatus === 'cancel') {
+        return {
+          icon: <AlertTriangle className="mx-auto mb-3 w-14 h-14 text-amber-400" />,
+          badge: 'bg-amber-100 text-amber-700',
+          badgeLabel: 'Payment Canceled',
+          heading: 'Payment was canceled',
+          message: 'Your payment was not completed. Use your original invite link to try again.',
+          showCalendar: false,
+        };
+      }
+      return {
+        icon: <AlertCircle className="mx-auto mb-3 text-red-500 w-14 h-14" />,
+        badge: 'bg-red-100 text-red-700',
+        badgeLabel: 'Payment Failed',
+        heading: 'Payment failed',
+        message: 'There was a problem processing your payment. Please try again or contact the event organizer.',
+        showCalendar: false,
+      };
+    })();
+
+    return (
+      <AttendeeLayout>
+        <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
+          <div className="w-full max-w-md">
+            <div className="p-8 bg-white border shadow-lg rounded-xl border-slate-200">
+              <div className="mb-6 text-center">
+                {statusConfig.icon}
+                <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mb-3 ${statusConfig.badge}`}>
+                  {statusConfig.badgeLabel}
+                </span>
+                <h1 className="mb-1 text-xl font-bold text-slate-900">{statusConfig.heading}</h1>
+                <p className="text-sm text-slate-500">{statusConfig.message}</p>
+              </div>
+
+              {event && (
+                <div className="p-4 mb-5 space-y-3 border bg-slate-50 rounded-xl border-slate-200">
+                  <div className="flex items-start gap-3">
+                    <Calendar className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-slate-500">Date</p>
+                      <p className="text-sm font-semibold text-slate-900">{formatEventDate(event.date)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Clock className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-slate-500">Time</p>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {formatEventTime(event.start_time)} – {formatEventTime(event.end_time)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-slate-500">Location</p>
+                      <p className="text-sm font-semibold text-slate-900">{event.location}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {statusConfig.showCalendar && calendarUrl && (
+                <a
+                  href={calendarUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-full gap-2 py-3 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
+                >
+                  <CalendarPlus className="w-5 h-5" />
+                  Add to Calendar
+                </a>
+              )}
+
+              {token && (
+                <button
+                  onClick={() => navigate(`/rsvp/${token}/confirmation`)}
+                  className="flex items-center justify-center w-full gap-2 py-3 mt-3 font-semibold transition-colors border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50"
+                >
+                  View Confirmation Details
+                </button>
+              )}
+            </div>
+
+            <p className="mt-6 text-xs text-center text-slate-400">
+              Questions? Contact the event organizer.
+            </p>
+          </div>
+        </div>
+      </AttendeeLayout>
+    );
+  }
+
   if (!invitee || !event) {
     return (
       <AttendeeLayout>
@@ -70,7 +209,7 @@ export default function ConfirmationPage() {
     );
   }
 
-  const isConfirmed = invitee.rsvp_status === 'confirmed';
+  const isConfirmed = invitee.rsvp_status === 'yes' || invitee.rsvp_status === 'confirmed';
   const calendarUrl = buildGoogleCalendarUrl(event);
 
   const paymentStatusDisplay = () => {

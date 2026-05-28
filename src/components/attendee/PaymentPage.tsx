@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEvents } from '../../contexts/EventContext';
 import { useInvitees } from '../../contexts/InviteeContext';
+import { apiPost } from '../../services/api';
 import AttendeeLayout from './AttendeeLayout';
 
 type PaymentMethod = 'card' | 'invoice';
@@ -29,7 +30,7 @@ export default function PaymentPage() {
     );
   }
 
-  if (invitee.rsvp_status !== 'confirmed') {
+  if (invitee.rsvp_status !== 'confirmed' && invitee.rsvp_status !== 'yes') {
     navigate(`/rsvp/${token}/respond`);
     return null;
   }
@@ -38,9 +39,21 @@ export default function PaymentPage() {
     setSubmitting(true);
     try {
       if (paymentMethod === 'card') {
-        // save selection; actual payment will be processed later
-        await updateInvitee(invitee.id, { payment_status: 'unpaid' });
-        navigate(`/rsvp/${token}/confirmation`);
+        const response = await apiPost<{ data: { data: { paymentId: number; redirectUrl: string; provider: string } } }>(
+          '/payments',
+          {
+            inviteeId: invitee.id,
+            name: `${invitee.firstname} ${invitee.lastname}`.trim(),
+            email: invitee.email,
+          },
+        );
+        const redirectUrl = response.data?.data?.redirectUrl;
+        if (redirectUrl) {
+          if (token) sessionStorage.setItem('payment_token', token);
+          window.location.href = redirectUrl;
+        } else {
+          navigate(`/rsvp/${token}/confirmation`);
+        }
       } else {
         // record that an invoice was requested
         await updateInvitee(invitee.id, { payment_status: 'invoice-issued' });

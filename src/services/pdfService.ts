@@ -20,7 +20,6 @@ export function generateAttendancePDF(event: any, invitees: any[]) {
 
   const startY = 68;
   let y = startY;
-  const lineHeight = 7;
 
   // Header row
   // Draw table header

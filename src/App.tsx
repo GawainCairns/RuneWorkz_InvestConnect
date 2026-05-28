@@ -94,6 +94,7 @@ export default function App() {
                     <Route path="/rsvp/:token/payment" element={<PaymentPage />} />
                     <Route path="/rsvp/:token/invoice" element={<InvoiceForm />} />
                     <Route path="/rsvp/:token/confirmation" element={<ConfirmationPage />} />
+                    <Route path="/confirmation" element={<ConfirmationPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </EmailLogProvider>
