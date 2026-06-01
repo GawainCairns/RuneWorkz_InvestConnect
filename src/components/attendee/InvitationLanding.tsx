@@ -12,12 +12,14 @@ const inputClass =
 export default function InvitationLanding() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const { getInviteeByToken, updateInvitee, fetchInvitees } = useInvitees();
+  const { getInviteeByToken, updateInvitee, fetchInvitees, resolveInviteeByToken } = useInvitees();
   const { getEvent, fetchEvents, events, loading: eventsLoading } = useEvents();
 
   const [detailsForm, setDetailsForm] = useState({ firstname: '', lastname: '', email: '' });
   const [detailsError, setDetailsError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [resolving, setResolving] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     if (!events.length && !eventsLoading) {
@@ -28,11 +30,17 @@ export default function InvitationLanding() {
   const invitee = token ? getInviteeByToken(token) : undefined;
   const event = invitee ? getEvent(invitee.event_id) : undefined;
 
+  // When events are loaded but the invitee isn't in context (e.g. incognito / fresh tab),
+  // look it up directly from the API using the invite code.
   useEffect(() => {
-    if (invitee) {
-      fetchInvitees(invitee.event_id);
-    }
-  }, [invitee?.event_id, fetchInvitees]);
+    if (!token || invitee || !events.length || resolving || notFound) return;
+    setResolving(true);
+    resolveInviteeByToken(token, events.map(e => e.id))
+      .then(found => { if (!found) setNotFound(true); })
+      .catch(() => setNotFound(true))
+      .finally(() => setResolving(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events.length, token, invitee]);
 
   useEffect(() => {
     if (invitee) {
@@ -85,6 +93,15 @@ export default function InvitationLanding() {
   }
 
   if (!invitee || !event) {
+    if (notFound) {
+      return (
+        <AttendeeLayout>
+          <div className="flex items-center justify-center min-h-screen">
+            <p className="text-slate-500">Invitation not found.</p>
+          </div>
+        </AttendeeLayout>
+      );
+    }
     return (
       <AttendeeLayout>
         <div className="flex items-center justify-center min-h-screen">
@@ -143,7 +160,7 @@ export default function InvitationLanding() {
             <div className="flex items-center gap-2 px-5 py-3 border-t border-slate-100 bg-emerald-50">
               <DollarSign className="w-4 h-4 text-emerald-600" />
               <span className="text-sm font-semibold text-emerald-700">
-                Ticket price: ${event.price.toFixed(2)}
+                Ticket price: R {event.price.toFixed(2)}
               </span>
             </div>
           )}

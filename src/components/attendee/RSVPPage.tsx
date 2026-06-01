@@ -1,20 +1,16 @@
 import { Calendar, MapPin, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useEvents } from '../../contexts/EventContext';
+import { useNavigate } from 'react-router-dom';
 import { useInvitees } from '../../contexts/InviteeContext';
+import { useAttendeeRoute } from '../../hooks/useAttendeeRoute';
 import { formatEventDate } from '../../utils/attendee';
 import AttendeeLayout from './AttendeeLayout';
 
 export default function RSVPPage() {
-  const { token } = useParams<{ token: string }>();
+  const { token, invitee, event, loading } = useAttendeeRoute();
   const navigate = useNavigate();
-  const { getInviteeByToken, updateInviteeLocal } = useInvitees();
-  const { getEvent } = useEvents();
+  const { updateInviteeLocal } = useInvitees();
   const [submitting, setSubmitting] = useState(false);
-
-  const invitee = token ? getInviteeByToken(token) : undefined;
-  const event = invitee ? getEvent(invitee.event_id) : undefined;
 
   const handleRSVP = (choice: 'yes' | 'no') => {
     if (!invitee) return;
@@ -25,18 +21,18 @@ export default function RSVPPage() {
         navigate(`/rsvp/${token}/dietary`);
       } else {
         updateInviteeLocal(invitee.id, { rsvp_status: 'no' });
-        navigate(`/rsvp/${token}/confirmation`);
+        navigate(`/rsvp/${token}/confirmation?status=success`);
       }
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (!invitee || !event) {
+  if (loading || !invitee || !event) {
     return (
       <AttendeeLayout>
         <div className="flex items-center justify-center min-h-screen">
-          <p className="text-slate-500">Invitation not found.</p>
+          <div className="w-8 h-8 border-4 rounded-full border-brand-600 border-t-transparent animate-spin" />
         </div>
       </AttendeeLayout>
     );

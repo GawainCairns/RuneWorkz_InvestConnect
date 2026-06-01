@@ -16,6 +16,9 @@ interface InviteeContextValue {
   updateInviteeLocal: (id: string, data: Partial<Invitee>) => void;
   markPaid: (id: string) => Promise<void>;
   getInviteeByToken: (token: string) => Invitee | undefined;
+  /** Fetches the invitee from the API by invite-code across all provided event IDs.
+   *  Useful for public (unauthenticated) attendee flows where the context starts empty. */
+  resolveInviteeByToken: (token: string, eventIds: string[]) => Promise<Invitee | undefined>;
 }
 
 const InviteeContext = createContext<InviteeContextValue | null>(null);
@@ -221,6 +224,43 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
     [invitees]
   );
 
+  const resolveInviteeByToken = useCallback(
+    async (token: string, eventIds: string[]): Promise<Invitee | undefined> => {
+      // Check in-memory first
+      const cached = invitees.find(inv => inv.invite_token === token);
+      if (cached) return cached;
+
+      if (!eventIds.length) return undefined;
+
+      try {
+        // Race all events in parallel – exactly one should resolve
+        const res = await Promise.any(
+          eventIds.map(eventId => inviteeService.getByCode(Number(eventId), token))
+        );
+        const i = res.invitee;
+        const resolved: Invitee = {
+          id: String(i.id),
+          event_id: String(i.eventId),
+          email: i.email || '',
+          firstname: i.firstname || '',
+          lastname: i.surname || '',
+          dietary: i.dietary || '',
+          rsvp_status: (i.rsvpStatus as any) || 'pending',
+          payment_status: (i.paymentStatus as any) || 'unpaid',
+          invite_token: (i.inviteCode as any) || token,
+          created_at: i.createdAt || '',
+        };
+        setInvitees(prev =>
+          prev.some(inv => inv.id === resolved.id) ? prev : [...prev, resolved]
+        );
+        return resolved;
+      } catch {
+        return undefined;
+      }
+    },
+    [invitees]
+  );
+
   const { token, profile } = useAuth();
   const { events } = useEvents();
 
@@ -239,7 +279,7 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
   }, [token, profile, events]);
 
   return (
-    <InviteeContext.Provider value={{ invitees, loading, error, fetchInvitees, addInvitee, addInvitees, updateInvitee, updateInviteeLocal, markPaid, getInviteeByToken }}>
+    <InviteeContext.Provider value={{ invitees, loading, error, fetchInvitees, addInvitee, addInvitees, updateInvitee, updateInviteeLocal, markPaid, getInviteeByToken, resolveInviteeByToken }}>
       {children}
     </InviteeContext.Provider>
   );

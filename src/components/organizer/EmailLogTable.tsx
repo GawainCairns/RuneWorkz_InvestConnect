@@ -68,7 +68,7 @@ export default function EmailLogTable({ emailLogs }: EmailLogTableProps) {
                       <div className="flex items-center justify-between gap-2">
                         <p className="text-sm text-slate-800 truncate">{log.to_email}</p>
                         <span className="text-xs text-slate-400 shrink-0">
-                          {new Date(log.sent_at).toLocaleDateString()}
+                          {new Date(log.sent_at).toLocaleDateString('en-ZA')}
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 truncate mt-0.5">{new Date(log.sent_at).toLocaleTimeString()}</p>

@@ -19,7 +19,7 @@ export function generateInvoiceNumber(): string {
 }
 
 export function formatEventDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
+  return new Date(dateStr).toLocaleDateString('en-ZA', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',

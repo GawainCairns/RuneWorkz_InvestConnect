@@ -85,7 +85,7 @@ export default function InvoiceForm() {
         invitee_id: invitee.id,
         to_email: form.contact_email.trim(),
         subject: `Invoice ${invoice.number} — ${event.title}`,
-        body: `<p>Dear ${form.contact_person},</p><p>Please find your invoice <strong>${invoice.number}</strong> for <strong>${event.title}</strong> attached.</p><p>Amount: $${event.price.toFixed(2)}</p><p>Entity: ${form.entity_name}</p><p>Address: ${form.address}</p>${form.vat_number ? `<p>VAT: ${form.vat_number}</p>` : ''}<p>Thank you.</p>`,
+        body: `<p>Dear ${form.contact_person},</p><p>Please find your invoice <strong>${invoice.number}</strong> for <strong>${event.title}</strong> attached.</p><p>Amount: R ${event.price.toFixed(2)}</p><p>Entity: ${form.entity_name}</p><p>Address: ${form.address}</p>${form.vat_number ? `<p>VAT: ${form.vat_number}</p>` : ''}<p>Thank you.</p>`,
         type: 'other',
       });
 
@@ -119,7 +119,7 @@ export default function InvoiceForm() {
 
             <div className="flex items-center justify-between px-4 py-3 mb-6 border rounded-lg bg-slate-50 border-slate-200">
               <span className="text-sm text-slate-600">{event.title}</span>
-              <span className="text-base font-bold text-slate-900">${event.price.toFixed(2)}</span>
+              <span className="text-base font-bold text-slate-900">R {event.price.toFixed(2)}</span>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">

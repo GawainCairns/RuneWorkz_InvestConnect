@@ -1,19 +1,15 @@
 import { Check } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useEvents } from '../../contexts/EventContext';
+import { useNavigate } from 'react-router-dom';
 import { useInvitees } from '../../contexts/InviteeContext';
+import { useAttendeeRoute } from '../../hooks/useAttendeeRoute';
 import { DIETARY_OPTIONS } from '../../utils/attendee';
 import AttendeeLayout from './AttendeeLayout';
 
 export default function DietaryPage() {
-  const { token } = useParams<{ token: string }>();
+  const { token, invitee, event, loading } = useAttendeeRoute();
   const navigate = useNavigate();
-  const { getInviteeByToken, updateInviteeLocal } = useInvitees();
-  const { getEvent } = useEvents();
-
-  const invitee = token ? getInviteeByToken(token) : undefined;
-  const event = invitee ? getEvent(invitee.event_id) : undefined;
+  const { updateInviteeLocal } = useInvitees();
 
   const [selected, setSelected] = useState(invitee?.dietary || '');
 
@@ -23,22 +19,22 @@ export default function DietaryPage() {
     if (event && event.price > 0) {
       navigate(`/rsvp/${token}/payment`);
     } else {
-      navigate(`/rsvp/${token}/confirmation`);
+      navigate(`/rsvp/${token}/confirmation?status=success`);
     }
   };
 
-  if (!invitee || !event) {
+  if (loading || !invitee || !event) {
     return (
       <AttendeeLayout>
         <div className="flex items-center justify-center min-h-screen">
-          <p className="text-slate-500">Invitation not found.</p>
+          <div className="w-8 h-8 border-4 rounded-full border-brand-600 border-t-transparent animate-spin" />
         </div>
       </AttendeeLayout>
     );
   }
 
   if (invitee.rsvp_status === 'declined') {
-    navigate(`/rsvp/${token}/confirmation`);
+    navigate(`/rsvp/${token}/confirmation?status=success`);
     return null;
   }
 

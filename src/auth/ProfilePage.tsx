@@ -21,7 +21,7 @@ export default function ProfilePage() {
 
   const formatDate = (dateStr: string) => {
     try {
-      return new Date(dateStr).toLocaleDateString('en-US', {
+      return new Date(dateStr).toLocaleDateString('en-ZA', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',

@@ -12,7 +12,7 @@ interface EventCardProps {
 }
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
+  return new Date(dateStr).toLocaleDateString('en-ZA', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',

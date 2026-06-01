@@ -4,7 +4,7 @@ import { useEvents } from '../../contexts/EventContext';
 import { useInvitees } from '../../contexts/InviteeContext';
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
+  return new Date(dateStr).toLocaleDateString('en-ZA', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',

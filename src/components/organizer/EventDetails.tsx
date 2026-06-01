@@ -11,7 +11,7 @@ import { generateAttendancePDF, generateDietaryPDF } from '../../services/pdfSer
 type Tab = 'invitees' | 'emails';
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
+  return new Date(dateStr).toLocaleDateString('en-ZA', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',

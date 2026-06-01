@@ -1,30 +1,26 @@
 import { CreditCard, FileText } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useEvents } from '../../contexts/EventContext';
+import { useNavigate } from 'react-router-dom';
 import { useInvitees } from '../../contexts/InviteeContext';
 import { apiPost } from '../../services/api';
+import { useAttendeeRoute } from '../../hooks/useAttendeeRoute';
 import AttendeeLayout from './AttendeeLayout';
 
 type PaymentMethod = 'card' | 'invoice';
 
 export default function PaymentPage() {
-  const { token } = useParams<{ token: string }>();
+  const { token, invitee, event, loading } = useAttendeeRoute();
   const navigate = useNavigate();
-  const { getInviteeByToken, updateInvitee } = useInvitees();
-  const { getEvent } = useEvents();
+  const { updateInvitee } = useInvitees();
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [submitting, setSubmitting] = useState(false);
 
-  const invitee = token ? getInviteeByToken(token) : undefined;
-  const event = invitee ? getEvent(invitee.event_id) : undefined;
-
-  if (!invitee || !event) {
+  if (loading || !invitee || !event) {
     return (
       <AttendeeLayout>
         <div className="flex items-center justify-center min-h-screen">
-          <p className="text-slate-500">Invitation not found.</p>
+          <div className="w-8 h-8 border-4 rounded-full border-brand-600 border-t-transparent animate-spin" />
         </div>
       </AttendeeLayout>
     );
@@ -45,6 +41,7 @@ export default function PaymentPage() {
             inviteeId: invitee.id,
             name: `${invitee.firstname} ${invitee.lastname}`.trim(),
             email: invitee.email,
+            token,
           },
         );
         const redirectUrl = response.data?.data?.redirectUrl;
@@ -84,7 +81,7 @@ export default function PaymentPage() {
             <div className="flex items-center justify-between px-5 py-4 mb-6 border bg-slate-50 rounded-xl border-slate-200">
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Amount due</p>
-                <p className="text-2xl font-bold text-slate-900">${event.price.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-slate-900">R {event.price.toFixed(2)}</p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-slate-500 mb-0.5">Event</p>

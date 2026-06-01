@@ -108,7 +108,7 @@ export default function AllEmailLogs() {
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0 ml-3">
                                   <span className="text-xs text-slate-400">
-                                    {new Date(log.sent_at).toLocaleDateString()}
+                                    {new Date(log.sent_at).toLocaleDateString('en-ZA')}
                                   </span>
                                   <button
                                     onClick={() => setPreview(log)}
