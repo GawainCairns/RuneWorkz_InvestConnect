@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInvitees } from '../../contexts/InviteeContext';
 import { useAttendeeRoute } from '../../hooks/useAttendeeRoute';
+import { inviteeService } from '../../services/inviteeService';
 import { formatEventDate } from '../../utils/attendee';
 import AttendeeLayout from './AttendeeLayout';
 
@@ -12,16 +13,23 @@ export default function RSVPPage() {
   const { updateInviteeLocal } = useInvitees();
   const [submitting, setSubmitting] = useState(false);
 
-  const handleRSVP = (choice: 'yes' | 'no') => {
+  const handleRSVP = async (choice: 'yes' | 'no') => {
     if (!invitee) return;
     setSubmitting(true);
     try {
+      updateInviteeLocal(invitee.id, { rsvp_status: choice });
+      await inviteeService.updateRsvp(Number(invitee.id), { rsvpStatus: choice });
       if (choice === 'yes') {
-        updateInviteeLocal(invitee.id, { rsvp_status: 'yes' });
         navigate(`/rsvp/${token}/dietary`);
       } else {
-        updateInviteeLocal(invitee.id, { rsvp_status: 'no' });
-        navigate(`/rsvp/${token}/confirmation?status=success`);
+        navigate(`/rsvp/${token}/confirmation?status=cancel`);
+      }
+    } catch {
+      // navigate regardless of API error
+      if (choice === 'yes') {
+        navigate(`/rsvp/${token}/dietary`);
+      } else {
+        navigate(`/rsvp/${token}/confirmation?status=cancel`);
       }
     } finally {
       setSubmitting(false);

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInvitees } from '../../contexts/InviteeContext';
 import { useAttendeeRoute } from '../../hooks/useAttendeeRoute';
+import { inviteeService } from '../../services/inviteeService';
 import { DIETARY_OPTIONS } from '../../utils/attendee';
 import AttendeeLayout from './AttendeeLayout';
 
@@ -12,10 +13,19 @@ export default function DietaryPage() {
   const { updateInviteeLocal } = useInvitees();
 
   const [selected, setSelected] = useState(invitee?.dietary || '');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!invitee) return;
-    updateInviteeLocal(invitee.id, { dietary: selected });
+    setSubmitting(true);
+    try {
+      updateInviteeLocal(invitee.id, { dietary: selected });
+      await inviteeService.updateRsvp(Number(invitee.id), { dietary: selected });
+    } catch {
+      // continue regardless of API error
+    } finally {
+      setSubmitting(false);
+    }
     if (event && event.price > 0) {
       navigate(`/rsvp/${token}/payment`);
     } else {
@@ -83,10 +93,10 @@ export default function DietaryPage() {
 
             <button
               onClick={handleContinue}
-              disabled={!selected}
+              disabled={!selected || submitting}
               className="w-full py-3 mt-6 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Continue →
+              {submitting ? 'Saving...' : 'Continue →'}
             </button>
           </div>
         </div>

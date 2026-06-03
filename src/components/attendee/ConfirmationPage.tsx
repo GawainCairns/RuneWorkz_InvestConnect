@@ -48,32 +48,12 @@ export default function ConfirmationPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Persist RSVP + dietary to the database (once), then fetch the latest invitee record
+  // Fetch the latest invitee record for display
   useEffect(() => {
     if (!contextInvitee || persistedRef.current) return;
     persistedRef.current = true;
 
-    const persistKey = `rsvp_persisted_${contextInvitee.id}`;
-    const persistPromise = localStorage.getItem(persistKey)
-      ? Promise.resolve()
-      : (() => {
-          localStorage.setItem(persistKey, '1');
-          const rsvpStatus =
-            contextInvitee.rsvp_status === 'yes' || contextInvitee.rsvp_status === 'confirmed'
-              ? 'yes'
-              : 'no';
-          return inviteeService
-            .updateRsvp(Number(contextInvitee.id), {
-              rsvpStatus,
-              dietary: contextInvitee.dietary || undefined,
-            })
-            .then(() => {})
-            .catch(() => {});
-        })();
-
-    persistPromise.then(() =>
-      inviteeService.getById(Number(contextInvitee.id))
-    ).then(res => {
+    inviteeService.getById(Number(contextInvitee.id)).then(res => {
       const i = res.invitee;
       const isPaidEvent = event ? event.price > 0 : false;
       const fresh: Invitee = {
