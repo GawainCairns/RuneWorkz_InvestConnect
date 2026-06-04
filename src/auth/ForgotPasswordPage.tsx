@@ -62,12 +62,9 @@ export default function ForgotPasswordPage() {
                 <CheckCircle className="w-7 h-7 text-green-500" />
               </div>
               <p className="text-sm text-gray-700 leading-relaxed">{successMessage}</p>
-              <Link
-                to="/login"
-                className="inline-block mt-6 text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors"
-              >
+              <button type="button" onClick={() => window.history.back()} className="inline-block mt-6 text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors">
                 Back to sign in
-              </Link>
+              </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -113,9 +110,9 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="flex items-center justify-center gap-4 mt-6">
-          <Link to="/login" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+          <button type="button" onClick={() => window.history.back()} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
             Back to sign in
-          </Link>
+          </button>
           <span className="text-gray-300">·</span>
           <Link to="/register" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
             Create account

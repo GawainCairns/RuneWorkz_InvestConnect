@@ -27,6 +27,9 @@ export function generateAttendancePDF(event: any, invitees: any[]) {
   const startY = 68;
   let y = startY;
 
+  // Only include invitees who have paid and RSVP'd yes
+  const filteredInvitees = invitees.filter(i => String(i.payment_status).toLowerCase() === 'paid' && String(i.rsvp_status).toLowerCase() === 'yes');
+
   // Header row
   // Draw table header
   const marginLeft = 14;
@@ -51,7 +54,7 @@ export function generateAttendancePDF(event: any, invitees: any[]) {
   y += rowHeight;
 
   // rows
-  invitees.forEach(inv => {
+  filteredInvitees.forEach(inv => {
     if (y + rowHeight > 287) { // leave small bottom margin
       doc.addPage();
       y = 20;
@@ -100,8 +103,11 @@ export function generateDietaryPDF(event: any, invitees: any[]) {
   doc.text('Dietary Summary', pageWidth / 2, summaryStart, { align: 'left' });
   doc.setFont('helvetica', 'normal');
 
+  // Only include invitees who have paid and RSVP'd yes
+  const filteredInvitees = invitees.filter(i => String(i.payment_status).toLowerCase() === 'paid' && String(i.rsvp_status).toLowerCase() === 'yes');
+
   const counts: Record<string, number> = {};
-  invitees.forEach(i => {
+  filteredInvitees.forEach(i => {
     const d = (i.dietary || i.dietary_requirements || '').toString().trim() || 'None';
     counts[d] = (counts[d] || 0) + 1;
   });
@@ -143,7 +149,7 @@ export function generateDietaryPDF(event: any, invitees: any[]) {
   });
 
   // add total of invitees who have RSVP'd under the same summary table
-  const rsvpTotal = invitees.filter(i => String(i.rsvp_status).toLowerCase() === 'yes').length;
+  const rsvpTotal = filteredInvitees.length;
   if (y + rowHeight > 287) {
     doc.addPage();
     y = 20;
@@ -189,7 +195,7 @@ export function generateDietaryPDF(event: any, invitees: any[]) {
   doc.setFont('helvetica', 'normal');
   y += rowHeight;
 
-  invitees.forEach(inv => {
+  filteredInvitees.forEach(inv => {
     if (y + rowHeight > 287) {
       doc.addPage();
       y = 20;

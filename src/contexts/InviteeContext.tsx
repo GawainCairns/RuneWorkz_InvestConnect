@@ -60,6 +60,23 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addInvitee = useCallback(async (data: Omit<Invitee, 'id' | 'invite_token' | 'created_at'>): Promise<Invitee> => {
+    // basic validation
+    if (!data.event_id) throw new Error('Event is required');
+    if (!data.firstname || data.firstname.trim() === '') throw new Error('First name is required');
+    if (!data.lastname || data.lastname.trim() === '') throw new Error('Last name is required');
+    if (!data.email || data.email.trim() === '') throw new Error('Email is required');
+    // simple email format check
+    const emailNorm = data.email.trim().toLowerCase();
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(emailNorm)) throw new Error('Email is not valid');
+
+    // duplicate check within current state by event
+    const exists = invitees.some(inv => inv.event_id === String(data.event_id) && (
+      (inv.email || '').toLowerCase() === emailNorm ||
+      ((inv.firstname || '').toLowerCase() === data.firstname.trim().toLowerCase() && (inv.lastname || '').toLowerCase() === data.lastname.trim().toLowerCase())
+    ));
+    if (exists) throw new Error('Invitee already exists for this event');
+
     try {
       const payload = {
         eventId: Number(data.event_id),
@@ -87,19 +104,32 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
       setInvitees(prev => [...prev, newInvitee]);
       return newInvitee;
     } catch (err) {
-      // fallback to local optimistic add on error
-      const newInvitee: Invitee = {
-        ...data,
-        id: crypto.randomUUID(),
-        invite_token: crypto.randomUUID(),
-        created_at: new Date().toISOString(),
-      };
-      setInvitees(prev => [...prev, newInvitee]);
-      return newInvitee;
+      // do not add a frontend-generated invitee when the API fails; propagate the error
+      throw err instanceof Error ? err : new Error('Failed to create invitee');
     }
   }, []);
 
   const addInvitees = useCallback(async (data: Omit<Invitee, 'id' | 'invite_token' | 'created_at'>[]): Promise<Invitee[]> => {
+    // validate all entries and check duplicates vs current state and within batch
+    if (!Array.isArray(data) || data.length === 0) throw new Error('No invitees provided');
+    const seenInBatch = new Set<string>();
+    for (const d of data) {
+      if (!d.event_id) throw new Error('Event is required for all invitees');
+      if (!d.firstname || d.firstname.trim() === '') throw new Error('First name is required for all invitees');
+      if (!d.lastname || d.lastname.trim() === '') throw new Error('Last name is required for all invitees');
+      if (!d.email || d.email.trim() === '') throw new Error('Email is required for all invitees');
+      const emailNorm = d.email.trim().toLowerCase();
+      const key = `${d.event_id}::${emailNorm}`;
+      if (seenInBatch.has(key)) throw new Error('Duplicate invitee in batch');
+      seenInBatch.add(key);
+
+      const exists = invitees.some(inv => inv.event_id === String(d.event_id) && (
+        (inv.email || '').toLowerCase() === emailNorm ||
+        ((inv.firstname || '').toLowerCase() === d.firstname.trim().toLowerCase() && (inv.lastname || '').toLowerCase() === d.lastname.trim().toLowerCase())
+      ));
+      if (exists) throw new Error(`Invitee ${d.firstname} ${d.lastname} already exists for event ${d.event_id}`);
+    }
+
     try {
       const payloads = data.map(d => ({
         eventId: Number(d.event_id),
@@ -129,32 +159,12 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
             created_at: i.createdAt || new Date().toISOString(),
           } as Invitee;
         });
-      // if some failed, fallback create local entries for them
-      const failedPayloads = results.filter((r: any) => !r.success).map((r: any) => r.item as any);
-      const fallback: Invitee[] = failedPayloads.map((p: any) => ({
-        id: crypto.randomUUID(),
-        event_id: String(p.eventId || (data[0] && data[0].event_id)),
-        email: p.email || '',
-        firstname: p.firstname || '',
-        lastname: p.surname || '',
-        dietary: p.dietary || '',
-        rsvp_status: (p.rsvpStatus as any) || 'pending',
-        payment_status: (p.paymentStatus as any) || 'unpaid',
-        invite_token: crypto.randomUUID(),
-        created_at: new Date().toISOString(),
-      }));
-      const newInvitees = [...created, ...fallback];
-      setInvitees(prev => [...prev, ...newInvitees]);
-      return newInvitees;
+      // only use invitees returned by the API; do not create frontend fallbacks
+      setInvitees(prev => [...prev, ...created]);
+      return created;
     } catch (err) {
-      const newInvitees: Invitee[] = data.map(d => ({
-        ...d,
-        id: crypto.randomUUID(),
-        invite_token: crypto.randomUUID(),
-        created_at: new Date().toISOString(),
-      }));
-      setInvitees(prev => [...prev, ...newInvitees]);
-      return newInvitees;
+      // propagate error instead of adding local entries
+      throw err instanceof Error ? err : new Error('Failed to create invitees');
     }
   }, []);
 
@@ -269,12 +279,53 @@ export function InviteeProvider({ children }: { children: React.ReactNode }) {
     if (!events || events.length === 0) return;
 
     // load invitees for events that don't yet have invitees loaded
-    for (const ev of events) {
-      const hasForEvent = invitees.some(i => i.event_id === ev.id);
-      if (!hasForEvent) {
-        fetchInvitees(ev.id).catch(() => {});
+    const missingEventIds = events
+      .filter(ev => !invitees.some(i => i.event_id === ev.id))
+      .map(ev => ev.id);
+
+    if (missingEventIds.length === 0) return;
+
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const results = await Promise.allSettled(
+          missingEventIds.map(id => inviteeService.getAll({ eventId: Number(id) } as any))
+        );
+
+        const apiInvitees: ApiInvitee[] = [];
+        for (const r of results) {
+          if (r.status === 'fulfilled') {
+            const res = r.value as any;
+            const items: ApiInvitee[] = (res && res.invitees) || [];
+            apiInvitees.push(...items);
+          }
+        }
+
+        const mapped = apiInvitees.map(i => ({
+          id: String(i.id),
+          event_id: String(i.eventId),
+          email: i.email || '',
+          firstname: i.firstname || '',
+          lastname: i.surname || '',
+          dietary: i.dietary || '',
+          rsvp_status: (i.rsvpStatus as any) || 'pending',
+          payment_status: (i.paymentStatus as any) || 'unpaid',
+          invite_token: (i.inviteCode as any) || '',
+          created_at: i.createdAt || '',
+        }));
+
+        setInvitees(prev => {
+          // remove any existing for these events and append fetched
+          const others = prev.filter(inv => !missingEventIds.includes(inv.event_id));
+          return [...others, ...mapped];
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch invitees');
+      } finally {
+        setLoading(false);
       }
-    }
+    })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, profile, events]);
 

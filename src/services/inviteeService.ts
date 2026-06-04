@@ -1,5 +1,5 @@
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from './api';
-import type { ApiInvitee, BatchInviteeResult, CreateInviteePayload, Pagination } from '../types/api';
+import type { ApiInvitee, BatchInviteeResult, CreateInviteePayload, InviteeByEmailResult, Pagination } from '../types/api';
 
 export interface ListInviteesParams {
   eventId?: number;
@@ -21,6 +21,10 @@ export const inviteeService = {
 
   getByCode(eventId: number, inviteCode: string): Promise<{ invitee: ApiInvitee }> {
     return apiGet(`/invitees/by-code/${eventId}/${inviteCode}`);
+  },
+
+  getByEmail(email: string): Promise<InviteeByEmailResult> {
+    return apiGet('/invitees/by-email', { email });
   },
 
   create(payload: CreateInviteePayload): Promise<{

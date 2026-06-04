@@ -1,4 +1,4 @@
-import { Calendar, Clock, DollarSign, MapPin, Users } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users } from 'lucide-react';
 import type { Event } from '../../types/organizer';
 
 interface EventCardProps {
@@ -65,7 +65,7 @@ export default function EventCard({
           </div>
           {event.price > 0 && (
             <div className="flex items-center gap-1 text-sm font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg shrink-0">
-              <DollarSign className="w-3.5 h-3.5" />
+              <span className="text-sm font-semibold">R</span>
               {event.price.toFixed(0)}
             </div>
           )}

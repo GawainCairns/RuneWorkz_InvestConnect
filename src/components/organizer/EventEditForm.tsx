@@ -56,6 +56,13 @@ export default function EventEditForm() {
     setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
+  const normalizeTime = (val: string) => {
+    if (!val) return '';
+    const [h] = val.split(':');
+    const hh = String(Number(h)).padStart(2, '0');
+    return `${hh}:00`;
+  };
+
   const validate = () => {
     const errs: Record<string, string> = {};
     if (!form.brand.trim()) errs.brand = 'Brand is required';
@@ -177,7 +184,7 @@ export default function EventEditForm() {
     return (
       <div className="max-w-2xl px-4 py-8 mx-auto text-center">
         <p className="text-slate-500">Event not found.</p>
-        <button onClick={() => navigate('/admin/events')} className="mt-4 text-sm text-brand-600 hover:underline">
+        <button onClick={() => window.history.back()} className="mt-4 text-sm text-brand-600 hover:underline">
           Back to Events
         </button>
       </div>
@@ -187,7 +194,7 @@ export default function EventEditForm() {
   return (
     <div className="max-w-2xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
       <button
-        onClick={() => navigate(`/admin/events/${eventId}`)}
+        onClick={() => window.history.back()}
         className="flex items-center gap-2 mb-6 text-sm transition-colors text-slate-600 hover:text-slate-900"
       >
         <ArrowLeft className="w-4 h-4" />
@@ -274,10 +281,10 @@ export default function EventEditForm() {
               <input type="date" className={inputClass} value={form.date} onChange={e => update('date', e.target.value)} />
             </FormField>
             <FormField label="Start Time" required error={errors.start_time}>
-              <input type="time" className={inputClass} value={form.start_time} onChange={e => update('start_time', e.target.value)} />
+              <input type="time" step={3600} className={inputClass} value={form.start_time} onChange={e => update('start_time', normalizeTime(e.target.value))} />
             </FormField>
             <FormField label="End Time" required error={errors.end_time}>
-              <input type="time" className={inputClass} value={form.end_time} onChange={e => update('end_time', e.target.value)} />
+              <input type="time" step={3600} className={inputClass} value={form.end_time} onChange={e => update('end_time', normalizeTime(e.target.value))} />
             </FormField>
           </div>
 
@@ -299,7 +306,7 @@ export default function EventEditForm() {
           )}
 
           <div className="flex items-center justify-end gap-3 pt-2">
-            <button type="button" onClick={() => navigate(`/admin/events/${eventId}`)} className="px-4 py-2 text-sm font-medium transition-colors bg-white border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50">
+            <button type="button" onClick={() => window.history.back()} className="px-4 py-2 text-sm font-medium transition-colors bg-white border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50">
               Cancel
             </button>
             <button type="submit" disabled={submitting} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed">

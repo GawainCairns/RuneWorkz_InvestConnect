@@ -100,7 +100,7 @@ export default function EmailEditPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8 text-center">
         <p className="text-slate-500">Event not found.</p>
-        <button onClick={() => navigate('/admin/events')} className="mt-4 text-brand-600 hover:underline text-sm">
+        <button onClick={() => window.history.back()} className="mt-4 text-brand-600 hover:underline text-sm">
           Back to Events
         </button>
       </div>
@@ -125,7 +125,7 @@ export default function EmailEditPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <button
-        onClick={() => navigate(`/admin/events/${eventId}`)}
+        onClick={() => window.history.back()}
         className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />

@@ -39,6 +39,8 @@ export default function EventDetails() {
   const [singleLast, setSingleLast] = useState('');
   const [singleEmail, setSingleEmail] = useState('');
   const [batchRaw, setBatchRaw] = useState('');
+  const [singleSubmitting, setSingleSubmitting] = useState(false);
+  const [batchSubmitting, setBatchSubmitting] = useState(false);
 
   const event = eventId ? getEvent(eventId) : undefined;
 
@@ -59,11 +61,11 @@ export default function EventDetails() {
     }
   }, [activeTab, eventId, fetchEmailLogs]);
 
-  if (!event) {
+    if (!event) {
     return (
       <div className="px-4 py-8 mx-auto text-center max-w-7xl">
         <p className="text-slate-500">Event not found.</p>
-        <button onClick={() => navigate('/admin/events')} className="mt-4 text-sm text-brand-600 hover:underline">
+        <button onClick={() => window.history.back()} className="mt-4 text-sm text-brand-600 hover:underline">
           Back to Events
         </button>
       </div>
@@ -94,7 +96,7 @@ export default function EventDetails() {
     <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => navigate('/admin/events')}
+          onClick={() => window.history.back()}
           className="flex items-center gap-2 text-sm transition-colors text-slate-600 hover:text-slate-900"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -254,6 +256,7 @@ export default function EventDetails() {
                       <button
                         onClick={async () => {
                           if (!eventId) return;
+                          setSingleSubmitting(true);
                           try {
                             await addInvitee({
                               event_id: String(eventId),
@@ -263,16 +266,18 @@ export default function EventDetails() {
                               rsvp_status: 'pending',
                               payment_status: 'unpaid',
                             } as any);
-                          } finally {
                             setSingleFirst('');
                             setSingleLast('');
                             setSingleEmail('');
                             setShowSingleForm(false);
+                          } finally {
+                            setSingleSubmitting(false);
                           }
                         }}
-                        className="px-3 py-2 text-sm text-white rounded-lg bg-brand-600"
+                        disabled={singleSubmitting}
+                        className={`px-3 py-2 text-sm text-white rounded-lg bg-brand-600 ${singleSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
-                        Save
+                        {singleSubmitting ? 'Saving...' : 'Save'}
                       </button>
                     </div>
                   </div>
@@ -290,6 +295,7 @@ export default function EventDetails() {
                       <button
                         onClick={async () => {
                           if (!eventId) return;
+                          setBatchSubmitting(true);
                           try {
                             const lines = batchRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
                             const items = lines.map(l => {
@@ -297,14 +303,16 @@ export default function EventDetails() {
                               return { event_id: String(eventId), firstname, lastname, email, dietary: '', rsvp_status: 'pending', payment_status: 'unpaid' };
                             });
                             if (items.length > 0) await addInvitees(items as any);
-                          } finally {
                             setBatchRaw('');
                             setShowBatchForm(false);
+                          } finally {
+                            setBatchSubmitting(false);
                           }
                         }}
-                        className="px-3 py-2 text-sm text-white rounded-lg bg-brand-600"
+                        disabled={batchSubmitting}
+                        className={`px-3 py-2 text-sm text-white rounded-lg bg-brand-600 ${batchSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
-                        Save All
+                        {batchSubmitting ? 'Saving...' : 'Save All'}
                       </button>
                     </div>
                   </div>

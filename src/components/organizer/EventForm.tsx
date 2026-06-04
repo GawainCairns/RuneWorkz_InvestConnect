@@ -30,6 +30,13 @@ export default function EventForm() {
     setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
+  const normalizeTime = (val: string) => {
+    if (!val) return '';
+    const [h] = val.split(':');
+    const hh = String(Number(h)).padStart(2, '0');
+    return `${hh}:00`;
+  };
+
   const [showAddBrand, setShowAddBrand] = useState(false);
   const [newBrandName, setNewBrandName] = useState('');
   const [newBrandDescription, setNewBrandDescription] = useState('');
@@ -98,7 +105,7 @@ export default function EventForm() {
   return (
     <div className="max-w-2xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
       <button
-        onClick={() => navigate('/admin/events')}
+        onClick={() => window.history.back()}
         className="flex items-center gap-2 mb-6 text-sm transition-colors text-slate-600 hover:text-slate-900"
       >
         <ArrowLeft className="w-4 h-4" />
@@ -204,17 +211,19 @@ export default function EventForm() {
             <FormField label="Start Time" required error={errors.start_time}>
               <input
                 type="time"
+                step={3600}
                 className={inputClass}
                 value={form.start_time}
-                onChange={e => update('start_time', e.target.value)}
+                onChange={e => update('start_time', normalizeTime(e.target.value))}
               />
             </FormField>
             <FormField label="End Time" required error={errors.end_time}>
               <input
                 type="time"
+                step={3600}
                 className={inputClass}
                 value={form.end_time}
-                onChange={e => update('end_time', e.target.value)}
+                onChange={e => update('end_time', normalizeTime(e.target.value))}
               />
             </FormField>
           </div>
@@ -262,7 +271,7 @@ export default function EventForm() {
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => navigate('/admin/events')}
+              onClick={() => window.history.back()}
               className="px-4 py-2 text-sm font-medium transition-colors bg-white border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50"
             >
               Cancel

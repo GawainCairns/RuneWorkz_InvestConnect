@@ -97,6 +97,16 @@ export interface BatchInviteeResult {
   item?: CreateInviteePayload;
 }
 
+export interface InviteeByEmailEntry {
+  event: ApiEvent;
+  invitee: ApiInvitee;
+}
+
+export interface InviteeByEmailResult {
+  email: string;
+  events: InviteeByEmailEntry[];
+}
+
 // ─── Invoices ─────────────────────────────────────────────────────────────────
 
 export interface ApiInvoice {

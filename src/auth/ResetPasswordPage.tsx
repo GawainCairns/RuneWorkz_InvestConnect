@@ -261,7 +261,7 @@ export default function ResetPasswordPage() {
 
         {(pageState === 'form' || pageState === 'invalid' || pageState === 'used') && (
           <p className="text-center text-xs text-gray-400 mt-6">
-            <Link to="/login" className="hover:text-gray-600 transition-colors">← Back to sign in</Link>
+            <button type="button" onClick={() => window.history.back()} className="hover:text-gray-600 transition-colors">← Back to sign in</button>
           </p>
         )}
       </div>
