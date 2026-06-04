@@ -1,6 +1,6 @@
 import { ArrowLeft, Plus, Upload, UserPlus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useEvents } from '../../contexts/EventContext';
 import { useInvitees } from '../../contexts/InviteeContext';
 import type { Invitee } from '../../types/organizer';
@@ -17,7 +17,6 @@ function sanitizeCell(val: string) {
 
 export default function InviteeList() {
   const { eventId } = useParams<{ eventId: string }>();
-  const navigate = useNavigate();
   const { getEvent } = useEvents();
   const { invitees, fetchInvitees, addInvitee, addInvitees } = useInvitees();
   const fileRef = useRef<HTMLInputElement>(null);

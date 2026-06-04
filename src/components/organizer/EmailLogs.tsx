@@ -1,13 +1,12 @@
 import { ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useEmailLogs } from '../../contexts/EmailLogContext';
 import { useEvents } from '../../contexts/EventContext';
 import EmailLogTable from './EmailLogTable';
 
 export default function EmailLogs() {
   const { eventId } = useParams<{ eventId: string }>();
-  const navigate = useNavigate();
   const { getEvent } = useEvents();
   const { emailLogs, loading, fetchEmailLogs } = useEmailLogs();
 

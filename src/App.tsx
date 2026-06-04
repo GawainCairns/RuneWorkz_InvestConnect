@@ -43,10 +43,10 @@ function RootRedirect() {
     );
   }
 
-  if (token) {
-    const isAdmin = !!profile?.roles?.some((r: any) => (r?.name || '').toString().toLowerCase() === 'admin' || (r?.permissions || []).some((p: any) => (p?.name || '').toString().toLowerCase() === 'admin' && Number(p.value) === 1));
-    return <Navigate to={isAdmin ? '/admin' : '/admin/invitee-dashboard'} replace />;
-  }
+    if (token) {
+      const isAdmin = !!profile?.roles?.some((r: any) => (r?.name || '').toString().toLowerCase() === 'admin' || (r?.permissions || []).some((p: any) => (p?.name || '').toString().toLowerCase() === 'admin' && Number(p.value) === 1));
+      return <Navigate to={isAdmin ? '/admin' : '/invitee-dashboard'} replace />;
+    }
 
   return <LandingPage />;
 }
@@ -76,6 +76,14 @@ export default function App() {
                         </ProtectedRoute>
                       }
                     />
+                          <Route
+                            path="/invitee-dashboard"
+                            element={
+                              <ProtectedRoute>
+                                <InviteeDashboard />
+                              </ProtectedRoute>
+                            }
+                          />
                     <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
                       <Route index element={<AdminDashboard />} />
                       <Route path="events" element={<EventList />} />
@@ -86,7 +94,7 @@ export default function App() {
                       <Route path="events/:eventId/emails" element={<EmailLogs />} />
                       <Route path="events/:eventId/email" element={<EmailEditPage />} />
                       <Route path="emails" element={<AllEmailLogs />} />
-                      <Route path="invitee-dashboard" element={<InviteeDashboard />} />
+                      {/* invitee-dashboard is available at top-level for non-admins */}
                     </Route>
                     <Route path="/rsvp/:token" element={<InvitationLanding />} />
                     <Route path="/rsvp/:token/respond" element={<RSVPPage />} />

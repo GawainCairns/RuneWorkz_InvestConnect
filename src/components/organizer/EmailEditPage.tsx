@@ -1,7 +1,7 @@
 import { ArrowLeft, Eye, RotateCcw, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { MouseEvent, KeyboardEvent } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useEvents } from '../../contexts/EventContext';
 import type { EventProperties } from '../../types/organizer';
 import FormField from './FormField';
@@ -43,7 +43,6 @@ function buildPreview(event: { brand: string; title: string; description: string
 
 export default function EmailEditPage() {
   const { eventId } = useParams<{ eventId: string }>();
-  const navigate = useNavigate();
   const { getEvent } = useEvents();
   const [props, setProps] = useState<Omit<EventProperties, 'event_id'>>(defaultProps);
   const [showPreview, setShowPreview] = useState(false);

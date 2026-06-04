@@ -3,6 +3,8 @@ import { Calendar, CheckCircle, Clock, ExternalLink, Mail } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { inviteeService } from '../../services/inviteeService';
 import type { InviteeByEmailEntry } from '../../types/api';
+import Header from '../Header';
+import Footer from '../Footer';
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-ZA', {
@@ -40,8 +42,10 @@ export default function InviteeDashboard() {
   }, [userEmail]);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
+    <div className="min-h-screen flex flex-col bg-slate-50">
+      <Header />
+      <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">My Invitations</h1>
         <p className="text-slate-500 mt-1 text-sm">
           Events you've been invited to, linked to <strong>{userEmail || 'your email'}</strong>.
@@ -114,6 +118,8 @@ export default function InviteeDashboard() {
           ))}
         </div>
       )}
+      </main>
+      <Footer />
     </div>
   );
 }

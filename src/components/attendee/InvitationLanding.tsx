@@ -12,7 +12,7 @@ const inputClass =
 export default function InvitationLanding() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const { getInviteeByToken, updateInvitee, fetchInvitees, resolveInviteeByToken } = useInvitees();
+  const { getInviteeByToken, updateInvitee, resolveInviteeByToken } = useInvitees();
   const { getEvent, fetchEvents, events, loading: eventsLoading } = useEvents();
 
   const [detailsForm, setDetailsForm] = useState({ firstname: '', lastname: '', email: '' });

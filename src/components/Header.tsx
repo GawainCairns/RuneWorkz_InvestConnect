@@ -73,15 +73,17 @@ export default function Header() {
                   <User className="w-4 h-4 text-gray-400" />
                   Profile
                 </button>
+                {hasAdminRole(profile) && (
+                  <button
+                    onClick={() => { setMenuOpen(false); navigate('/admin'); }}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <Home className="w-4 h-4 text-gray-400" />
+                    Dashboard
+                  </button>
+                )}
                 <button
-                  onClick={() => { setMenuOpen(false); navigate('/admin'); }}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <Home className="w-4 h-4 text-gray-400" />
-                  Dashboard
-                </button>
-                <button
-                  onClick={() => { setMenuOpen(false); navigate('/admin/invitee-dashboard'); }}
+                  onClick={() => { setMenuOpen(false); navigate('/invitee-dashboard'); }}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   <Mail className="w-4 h-4 text-gray-400" />
