@@ -1,4 +1,4 @@
-import { ArrowLeft, Eye, RotateCcw, Save } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { MouseEvent, KeyboardEvent } from 'react';
 import { useParams } from 'react-router-dom';
@@ -45,7 +45,7 @@ export default function EmailEditPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const { getEvent } = useEvents();
   const [props, setProps] = useState<Omit<EventProperties, 'event_id'>>(defaultProps);
-  const [showPreview, setShowPreview] = useState(false);
+  // Always show preview
   const [saved, setSaved] = useState(false);
   const [remotePreviewHtml, setRemotePreviewHtml] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -97,9 +97,9 @@ export default function EmailEditPage() {
 
   if (!event) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8 text-center">
+      <div className="max-w-4xl px-4 py-8 mx-auto text-center">
         <p className="text-slate-500">Event not found.</p>
-        <button onClick={() => window.history.back()} className="mt-4 text-brand-600 hover:underline text-sm">
+        <button onClick={() => window.history.back()} className="mt-4 text-sm text-brand-600 hover:underline">
           Back to Events
         </button>
       </div>
@@ -109,7 +109,7 @@ export default function EmailEditPage() {
   const previewHtml = buildPreview(event, props);
 
   useEffect(() => {
-    if (!showPreview || !eventId) return;
+    if (!eventId) return;
     setRemotePreviewHtml(null);
     setPreviewError(null);
     setLoadingPreview(true);
@@ -119,13 +119,13 @@ export default function EmailEditPage() {
       .then(html => setRemotePreviewHtml(html))
       .catch(err => setPreviewError(String(err?.message ?? err)))
       .finally(() => setLoadingPreview(false));
-  }, [showPreview, eventId]);
+  }, [eventId]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <button
         onClick={() => window.history.back()}
-        className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-6 transition-colors"
+        className="flex items-center gap-2 mb-6 text-sm transition-colors text-slate-600 hover:text-slate-900"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Event
@@ -134,19 +134,12 @@ export default function EmailEditPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Email Template</h1>
-          <p className="text-slate-500 text-sm mt-1">{event.title}</p>
+          <p className="mt-1 text-sm text-slate-500">{event.title}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowPreview(p => !p)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-          >
-            <Eye className="w-4 h-4" />
-            {showPreview ? 'Hide Preview' : 'Preview'}
-          </button>
-          <button
             onClick={handleClear}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors bg-white border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-50"
           >
             <RotateCcw className="w-4 h-4" />
             Reset
@@ -163,8 +156,8 @@ export default function EmailEditPage() {
         </div>
       </div>
 
-      <div className={`grid grid-cols-1 ${showPreview ? 'lg:grid-cols-2' : ''} gap-6`}>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="p-6 space-y-5 bg-white border shadow-sm rounded-xl border-slate-200">
           <FormField label="Pre-Text" hint="Opening paragraph before event details">
             <textarea
               className={`${inputClass} resize-none`}
@@ -203,23 +196,21 @@ export default function EmailEditPage() {
           </FormField>
         </div>
 
-        {showPreview && (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-4 overflow-y-auto max-h-[600px]">
-              {loadingPreview ? (
-                <p className="text-sm text-slate-500">Loading preview…</p>
-              ) : previewError ? (
-                <div className="text-sm text-red-600">Failed to load preview: {previewError}</div>
-              ) : (
-                <div
-                  onClick={handlePreviewClick}
-                  onKeyDown={handlePreviewKeyDown}
-                  dangerouslySetInnerHTML={{ __html: remotePreviewHtml ?? previewHtml }}
-                />
-              )}
-            </div>
+        <div className="overflow-hidden bg-white border shadow-sm rounded-xl border-slate-200">
+          <div className="p-4 overflow-y-auto max-h-[600px]">
+            {loadingPreview ? (
+              <p className="text-sm text-slate-500">Loading preview…</p>
+            ) : previewError ? (
+              <div className="text-sm text-red-600">Failed to load preview: {previewError}</div>
+            ) : (
+              <div
+                onClick={handlePreviewClick}
+                onKeyDown={handlePreviewKeyDown}
+                dangerouslySetInnerHTML={{ __html: remotePreviewHtml ?? previewHtml }}
+              />
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

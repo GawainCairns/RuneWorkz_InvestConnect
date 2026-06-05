@@ -23,8 +23,9 @@ export default function ConfirmationPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // status defaults to 'success' when navigating from non-payment flows (RSVP no / free event)
-  const status = (searchParams.get('status') as 'success' | 'cancel' | 'failure') ?? 'success';
+  // status defaults to 'success' when navigating from non-payment flows
+  // supported values: 'success' (payment or RSVP success), 'declined' (RSVP no), 'cancel' (payment cancelled), 'failure' (payment failed)
+  const status = (searchParams.get('status') as 'success' | 'declined' | 'cancel' | 'failure') ?? 'success';
 
   // Recover token from sessionStorage when redirected from payment gateway
   const token = paramToken ?? (sessionStorage.getItem('payment_token') ?? undefined);
@@ -151,6 +152,15 @@ export default function ConfirmationPage() {
               ? `A confirmation has been sent to ${invitee.email}.`
               : `We've noted your response for ${event.title}.`,
           showCalendar: isConfirmed,
+        };
+      case 'declined':
+        return {
+          icon: <AlertTriangle className="mx-auto mb-3 w-14 h-14 text-slate-400" />,
+          badgeClass: 'bg-slate-100 text-slate-600',
+          badgeLabel: 'RSVP Declined',
+          heading: "We're sorry you can't make it",
+          message: `Thanks for letting us know. If this was a mistake you can update your RSVP using the original invite link.`,
+          showCalendar: false,
         };
       case 'cancel':
         return {

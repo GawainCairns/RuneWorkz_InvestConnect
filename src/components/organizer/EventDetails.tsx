@@ -38,9 +38,19 @@ export default function EventDetails() {
   const [singleFirst, setSingleFirst] = useState('');
   const [singleLast, setSingleLast] = useState('');
   const [singleEmail, setSingleEmail] = useState('');
+  const [singleErrors, setSingleErrors] = useState<Record<string, string>>({});
   const [batchRaw, setBatchRaw] = useState('');
+  const [batchError, setBatchError] = useState('');
   const [singleSubmitting, setSingleSubmitting] = useState(false);
   const [batchSubmitting, setBatchSubmitting] = useState(false);
+
+  const validateSingle = () => {
+    const e: Record<string, string> = {};
+    if (!singleFirst.trim()) e.firstname = 'First name is required';
+    if (!singleLast.trim()) e.lastname = 'Last name is required';
+    if (!singleEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(singleEmail.trim())) e.email = 'Valid email is required';
+    return e;
+  };
 
   const event = eventId ? getEvent(eventId) : undefined;
 
@@ -240,22 +250,27 @@ export default function EventDetails() {
                     <div className="space-y-3">
                       <div>
                         <label className="block text-sm text-slate-600">First name</label>
-                        <input value={singleFirst} onChange={e => setSingleFirst(e.target.value)} className="block w-full px-3 py-2 mt-1 border rounded-md" />
+                        <input value={singleFirst} onChange={e => { setSingleFirst(e.target.value); setSingleErrors(p => { const c = {...p}; delete c.firstname; return c; }); }} className="block w-full px-3 py-2 mt-1 border rounded-md" />
                       </div>
                       <div>
                         <label className="block text-sm text-slate-600">Last name</label>
-                        <input value={singleLast} onChange={e => setSingleLast(e.target.value)} className="block w-full px-3 py-2 mt-1 border rounded-md" />
+                        <input value={singleLast} onChange={e => { setSingleLast(e.target.value); setSingleErrors(p => { const c = {...p}; delete c.lastname; return c; }); }} className="block w-full px-3 py-2 mt-1 border rounded-md" />
                       </div>
                       <div>
                         <label className="block text-sm text-slate-600">Email</label>
-                        <input value={singleEmail} onChange={e => setSingleEmail(e.target.value)} className="block w-full px-3 py-2 mt-1 border rounded-md" />
+                        <input value={singleEmail} onChange={e => { setSingleEmail(e.target.value); setSingleErrors(p => { const c = {...p}; delete c.email; return c; }); }} className="block w-full px-3 py-2 mt-1 border rounded-md" />
                       </div>
                     </div>
-                    <div className="flex justify-end gap-2 mt-4">
-                      <button onClick={() => setShowSingleForm(false)} className="px-3 py-2 text-sm bg-white border rounded-lg">Cancel</button>
+                    <div className="flex items-center justify-end gap-2 mt-4">
+                      {Object.keys(singleErrors).length > 0 && (
+                        <p className="mr-auto text-sm text-red-600">{Object.values(singleErrors).join('. ')}</p>
+                      )}
+                      <button onClick={() => { setShowSingleForm(false); setSingleErrors({}); }} className="px-3 py-2 text-sm bg-white border rounded-lg">Cancel</button>
                       <button
                         onClick={async () => {
                           if (!eventId) return;
+                          const errs = validateSingle();
+                          if (Object.keys(errs).length) { setSingleErrors(errs); return; }
                           setSingleSubmitting(true);
                           try {
                             await addInvitee({
@@ -269,6 +284,7 @@ export default function EventDetails() {
                             setSingleFirst('');
                             setSingleLast('');
                             setSingleEmail('');
+                            setSingleErrors({});
                             setShowSingleForm(false);
                           } finally {
                             setSingleSubmitting(false);
@@ -289,21 +305,32 @@ export default function EventDetails() {
                   <div className="relative w-full max-w-2xl p-6 bg-white shadow-lg rounded-xl">
                     <h3 className="mb-3 text-lg font-semibold">Add Invitees (Batch)</h3>
                     <p className="mb-3 text-sm text-slate-600">Enter one entry per line using comma-separated fields: <span className="font-mono">firstname,lastname,email</span></p>
-                    <textarea value={batchRaw} onChange={e => setBatchRaw(e.target.value)} rows={8} className="w-full p-3 border rounded-md" placeholder="John,Doe,john@example.com\nJane,Smith,jane@example.com" />
-                    <div className="flex justify-end gap-2 mt-4">
-                      <button onClick={() => setShowBatchForm(false)} className="px-3 py-2 text-sm bg-white border rounded-lg">Cancel</button>
+                    <textarea value={batchRaw} onChange={e => { setBatchRaw(e.target.value); setBatchError(''); }} rows={8} className="w-full p-3 border rounded-md" placeholder="John,Doe,john@example.com\nJane,Smith,jane@example.com" />
+                    <div className="flex items-center justify-end gap-2 mt-4">
+                      {batchError && (
+                        <p className="mr-auto text-sm text-red-600">{batchError}</p>
+                      )}
+                      <button onClick={() => { setShowBatchForm(false); setBatchError(''); }} className="px-3 py-2 text-sm bg-white border rounded-lg">Cancel</button>
                       <button
                         onClick={async () => {
                           if (!eventId) return;
+                          const lines = batchRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+                          if (!lines.length) { setBatchError('Enter at least one row.'); return; }
+                          const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                          const invalid = lines.filter(l => {
+                            const [fn, ln, em] = l.split(',').map(p => p.trim());
+                            return !fn || !ln || !em || !emailRe.test(em);
+                          });
+                          if (invalid.length) { setBatchError(`${invalid.length} row(s) have missing or invalid fields (format: firstname,lastname,email).`); return; }
                           setBatchSubmitting(true);
                           try {
-                            const lines = batchRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
                             const items = lines.map(l => {
                               const [firstname = '', lastname = '', email = ''] = l.split(',').map(p => p.trim());
                               return { event_id: String(eventId), firstname, lastname, email, dietary: '', rsvp_status: 'pending', payment_status: 'unpaid' };
                             });
-                            if (items.length > 0) await addInvitees(items as any);
+                            await addInvitees(items as any);
                             setBatchRaw('');
+                            setBatchError('');
                             setShowBatchForm(false);
                           } finally {
                             setBatchSubmitting(false);

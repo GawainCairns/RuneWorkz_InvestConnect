@@ -1,6 +1,7 @@
 import { Calendar, Clock, DollarSign, MapPin, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { useEvents } from '../../contexts/EventContext';
 import { useInvitees } from '../../contexts/InviteeContext';
 import { formatEventDate, formatEventTime } from '../../utils/attendee';
@@ -13,6 +14,7 @@ export default function InvitationLanding() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { getInviteeByToken, updateInvitee, resolveInviteeByToken } = useInvitees();
+  const { token: authToken } = useAuth();
   const { getEvent, fetchEvents, events, loading: eventsLoading } = useEvents();
 
   const [detailsForm, setDetailsForm] = useState({ firstname: '', lastname: '', email: '' });
@@ -129,6 +131,16 @@ export default function InvitationLanding() {
       </div>
 
       <div className="max-w-2xl px-4 mx-auto -mt-6">
+        {authToken && (
+          <div className="max-w-2xl px-4 mx-auto mt-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="mb-2 text-sm font-medium text-slate-600 hover:text-slate-800"
+            >
+              ← Back
+            </button>
+          </div>
+        )}
         <div className="overflow-hidden bg-white border shadow-lg rounded-xl border-slate-200">
           <div className="grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-y-0 sm:divide-x divide-slate-100">
             <div className="flex items-center gap-3 px-5 py-4">
@@ -220,23 +232,111 @@ export default function InvitationLanding() {
             </>
           ) : (
             <>
-              <div className="flex items-center gap-3 mb-5">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-100 shrink-0">
-                  <User className="w-5 h-5 text-brand-700" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    {invitee.firstname} {invitee.lastname}
-                  </p>
-                  <p className="text-xs text-slate-500">{invitee.email}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleProceed}
-                className="w-full py-3 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
-              >
-                Continue to RSVP →
-              </button>
+              {(() => {
+                const rsvpRaw = invitee.rsvp_status;
+                const rsvp = rsvpRaw === 'confirmed' ? 'yes' : rsvpRaw === 'declined' ? 'no' : rsvpRaw;
+                const paid = invitee.payment_status === 'paid';
+
+                if (rsvp === 'pending') {
+                  return (
+                    <>
+                      <div className="flex items-center gap-3 mb-5">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-100 shrink-0">
+                          <User className="w-5 h-5 text-brand-700" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {invitee.firstname} {invitee.lastname}
+                          </p>
+                          <p className="text-xs text-slate-500">{invitee.email}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleProceed}
+                        className="w-full py-3 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
+                      >
+                        Continue to RSVP →
+                      </button>
+                    </>
+                  );
+                }
+
+                if (rsvp === 'no') {
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 shrink-0">
+                          <User className="w-5 h-5 text-slate-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">{invitee.firstname} {invitee.lastname}</p>
+                          <p className="text-xs text-slate-500">{invitee.email}</p>
+                        </div>
+                      </div>
+                      <div className="p-4 text-center rounded-lg bg-slate-50 border border-slate-100">
+                        <p className="text-base font-semibold text-slate-900">You declined the invitation</p>
+                        <p className="text-sm text-slate-600">We're sorry you can't make it. If this was a mistake you can respond again from your invitation link.</p>
+                      </div>
+                      <button
+                        onClick={() => navigate(`/rsvp/${token}/respond`)}
+                        className="w-full py-3 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
+                      >
+                        View / Update RSVP →
+                      </button>
+                    </div>
+                  );
+                }
+
+                if (rsvp === 'yes' && paid) {
+                  return (
+                    <div className="space-y-6 text-center">
+                      <h2 className="text-2xl font-bold text-slate-900">I look forward to you coming</h2>
+                      <p className="text-sm text-slate-600">Thanks {invitee.firstname}, your RSVP and payment are confirmed. We look forward to seeing you at the event.</p>
+                      <div className="mt-4 p-4 rounded-lg bg-emerald-50 border border-emerald-100">
+                        <p className="text-sm font-medium text-emerald-700">Event: {event.title}</p>
+                        <p className="text-xs text-emerald-700">{formatEventDate(event.date)} • {formatEventTime(event.start_time)}</p>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // rsvp === 'yes' but not paid, or any other known status: show status summary
+                return (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-100 shrink-0">
+                        <User className="w-5 h-5 text-brand-700" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{invitee.firstname} {invitee.lastname}</p>
+                        <p className="text-xs text-slate-500">{invitee.email}</p>
+                      </div>
+                    </div>
+                    <div className="p-4 text-center rounded-lg bg-slate-50 border border-slate-100">
+                      <p className="text-base font-semibold text-slate-900">RSVP: {rsvp === 'yes' ? 'Yes' : rsvp === 'no' ? 'No' : rsvp}</p>
+                      {rsvp === 'yes' && !paid && (
+                        <p className="text-sm text-slate-600">You responded Yes but your payment is not yet recorded.</p>
+                      )}
+                    </div>
+                    {rsvp === 'yes' && !paid && (
+                      <button
+                        onClick={() => navigate(`/rsvp/${token}/payment`)}
+                        className="w-full py-3 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
+                      >
+                        Pay for your ticket →
+                      </button>
+                    )}
+                    {!(rsvp === 'yes' && paid) && (
+                      <button
+                        onClick={() => navigate(`/rsvp/${token}/respond`)}
+                        className="w-full py-3 mt-3 font-semibold text-white transition-colors rounded-lg bg-slate-600 hover:bg-slate-700"
+                      >
+                        View / Update RSVP →
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
             </>
           )}
         </div>

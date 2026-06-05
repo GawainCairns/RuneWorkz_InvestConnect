@@ -22,14 +22,14 @@ export default function RSVPPage() {
       if (choice === 'yes') {
         navigate(`/rsvp/${token}/dietary`);
       } else {
-        navigate(`/rsvp/${token}/confirmation?status=cancel`);
+        navigate(`/rsvp/${token}/confirmation?status=declined`);
       }
     } catch {
       // navigate regardless of API error
       if (choice === 'yes') {
         navigate(`/rsvp/${token}/dietary`);
       } else {
-        navigate(`/rsvp/${token}/confirmation?status=cancel`);
+        navigate(`/rsvp/${token}/confirmation?status=declined`);
       }
     } finally {
       setSubmitting(false);
