@@ -1,7 +1,9 @@
 import { Check, Copy, DollarSign, Mail, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
+import { useAlert } from '../../contexts/AlertContext';
 import { useEmailLogs } from '../../contexts/EmailLogContext';
 import { useInvitees } from '../../contexts/InviteeContext';
+import { emailService } from '../../services/emailService';
 import type { Invitee } from '../../types/organizer';
 
 interface InviteeTableProps {
@@ -29,7 +31,9 @@ function StatusBadge({ value, positive, negative }: { value: string; positive: s
 export default function InviteeTable({ eventId, invitees }: InviteeTableProps) {
   const { markPaid } = useInvitees();
   const { logEmail } = useEmailLogs();
+  const { showAlert } = useAlert();
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
 
   const handleCopyLink = (invitee: Invitee) => {
     const link = `${window.location.origin}/rsvp/${invitee.invite_token}`;
@@ -40,14 +44,23 @@ export default function InviteeTable({ eventId, invitees }: InviteeTableProps) {
   };
 
   const handleResend = async (invitee: Invitee) => {
-    await logEmail({
-      event_id: eventId,
-      invitee_id: invitee.id,
-      to_email: invitee.email,
-      subject: `You're invited`,
-      body: `<p>Hi ${invitee.firstname}, your invite link: ${window.location.origin}/rsvp/${invitee.invite_token}</p>`,
-      type: 'resend',
-    });
+    setResendingId(invitee.id);
+    try {
+      await emailService.resendInvite(Number(invitee.id));
+      await logEmail({
+        event_id: eventId,
+        invitee_id: invitee.id,
+        to_email: invitee.email,
+        subject: `You're invited`,
+        body: `<p>Hi ${invitee.firstname}, your invite link: ${window.location.origin}/rsvp/${invitee.invite_token}</p>`,
+        type: 'resend',
+      });
+      showAlert(`Resent invite to ${invitee.email}`, 'success');
+    } catch (error) {
+      showAlert(error instanceof Error ? error.message : 'Failed to resend invite', 'error');
+    } finally {
+      setResendingId(null);
+    }
   };
 
   const handleMarkPaid = async (id: string) => {
@@ -114,9 +127,10 @@ export default function InviteeTable({ eventId, invitees }: InviteeTableProps) {
                   <button
                     onClick={() => handleResend(invitee)}
                     title="Resend invite email"
-                    className="p-1.5 rounded-md text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors"
+                    disabled={resendingId === invitee.id}
+                    className="p-1.5 rounded-md text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Mail className="w-4 h-4" />
+                    <Mail className={`w-4 h-4 ${resendingId === invitee.id ? 'animate-pulse' : ''}`} />
                   </button>
                   {invitee.payment_status !== 'paid' && (
                     <button

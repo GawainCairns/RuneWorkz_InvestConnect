@@ -77,6 +77,18 @@ export default function EmailEditPage() {
     }
   }, [eventId]);
 
+  useEffect(() => {
+    if (!eventId) return;
+    setRemotePreviewHtml(null);
+    setPreviewError(null);
+    setLoadingPreview(true);
+    emailService
+      .getEmailPreview(Number(eventId))
+      .then(html => setRemotePreviewHtml(html))
+      .catch(err => setPreviewError(String(err?.message ?? err)))
+      .finally(() => setLoadingPreview(false));
+  }, [eventId]);
+
   const update = (field: keyof typeof defaultProps, value: string) => {
     setProps(prev => ({ ...prev, [field]: value }));
     setSaved(false);
@@ -105,22 +117,7 @@ export default function EmailEditPage() {
       </div>
     );
   }
-
   const previewHtml = buildPreview(event, props);
-
-  useEffect(() => {
-    if (!eventId) return;
-    setRemotePreviewHtml(null);
-    setPreviewError(null);
-    setLoadingPreview(true);
-    const template: EmailTemplate = 'invite';
-    emailService
-      .getEmailPreview(Number(eventId), template)
-      .then(html => setRemotePreviewHtml(html))
-      .catch(err => setPreviewError(String(err?.message ?? err)))
-      .finally(() => setLoadingPreview(false));
-  }, [eventId]);
-
   return (
     <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <button
