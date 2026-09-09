@@ -10,6 +10,8 @@ interface EmailLogTableProps {
 export default function EmailLogTable({ emailLogs }: EmailLogTableProps) {
   const [selected, setSelected] = useState<EmailLog | null>(null);
   const [preview, setPreview] = useState<EmailLog | null>(null);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [expandedSubjects, setExpandedSubjects] = useState<Record<string, boolean>>({});
 
   const groups = useMemo(() => {
@@ -22,6 +24,65 @@ export default function EmailLogTable({ emailLogs }: EmailLogTableProps) {
     }
     return Array.from(map.entries()).map(([subject, logs]) => ({ subject, logs }));
   }, [emailLogs]);
+
+  async function openPreview(log: EmailLog) {
+    setPreview(log);
+    setPreviewHtml(null);
+    setPreviewLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3080/investconnect/email-logs/${log.id}`, {
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) {
+        setPreviewHtml(log.body);
+        return;
+      }
+      const data = await res.json();
+      const html = data?.providerDetails?.data?.htmlBody || data?.html_body || log.body;
+      setPreviewHtml(typeof html === 'string' ? html : String(html));
+    } catch (err) {
+      setPreviewHtml(log.body);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  const { isJson: selectedIsJson, parsed: selectedParsed } = useMemo(() => {
+    if (!selected?.body) return { isJson: false, parsed: null } as const;
+    try {
+      return { isJson: true, parsed: JSON.parse(selected.body) } as const;
+    } catch (err) {
+      return { isJson: false, parsed: null } as const;
+    }
+  }, [selected?.body]);
+
+  function renderJson(value: any): JSX.Element {
+    if (value === null || value === undefined) return <span className="text-slate-600">{String(value)}</span>;
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+      return <span className="text-slate-700">{String(value)}</span>;
+    }
+    if (Array.isArray(value)) {
+      return (
+        <ol className="list-decimal pl-5">
+          {value.map((v, i) => (
+            <li key={i} className="mb-1">
+              {renderJson(v)}
+            </li>
+          ))}
+        </ol>
+      );
+    }
+    return (
+      <div className="space-y-2">
+        {Object.keys(value).map((k) => (
+          <div key={k} className="flex gap-3 items-start">
+            <div className="text-xs text-slate-500 w-36 shrink-0">{k}</div>
+            <div className="flex-1">{renderJson(value[k])}</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (emailLogs.length === 0) {
     return (
@@ -92,17 +153,27 @@ export default function EmailLogTable({ emailLogs }: EmailLogTableProps) {
                   </p>
                 </div>
                 <button
-                  onClick={() => setPreview(selected)}
+                  onClick={() => openPreview(selected)}
                   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors shrink-0"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   Preview
                 </button>
+              
+              {
+                /* fetch preview HTML when opening */
+              }
               </div>
-              <div
-                className="text-sm text-slate-700 prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: selected.body }}
-              />
+              {selectedIsJson && selectedParsed ? (
+                <div className="text-sm text-slate-700 max-w-none">
+                  {renderJson(selectedParsed)}
+                </div>
+              ) : (
+                <div
+                  className="text-sm text-slate-700 prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: selected.body }}
+                />
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center py-8">
@@ -118,8 +189,12 @@ export default function EmailLogTable({ emailLogs }: EmailLogTableProps) {
           subject={preview.subject}
           toEmail={preview.to_email}
           sentAt={preview.sent_at}
-          body={preview.body}
-          onClose={() => setPreview(null)}
+          body={previewHtml ?? preview.body}
+          onClose={() => {
+            setPreview(null);
+            setPreviewHtml(null);
+            setPreviewLoading(false);
+          }}
         />
       )}
     </>

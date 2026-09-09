@@ -7,14 +7,14 @@ import EventCard from './EventCard';
 
 export default function EventList() {
   const navigate = useNavigate();
-  const { events, loading, fetchEvents } = useEvents();
+  const { events, loading, fetchEvents, eventsFetched } = useEvents();
   const { invitees } = useInvitees();
 
   useEffect(() => {
-    if (!events.length && !loading) {
+    if (!events.length && !loading && !eventsFetched) {
       fetchEvents().catch(() => {});
     }
-  }, [fetchEvents, events.length, loading]);
+  }, [fetchEvents, events.length, loading, eventsFetched]);
 
   const now = new Date().toISOString().split('T')[0];
   const upcoming = events.filter(e => e.date >= now);

@@ -10,6 +10,7 @@ interface EventContextValue {
   loading: boolean;
   error: string | null;
   fetchEvents: () => Promise<void>;
+  eventsFetched: boolean;
   createEvent: (data: Omit<Event, 'id' | 'tenant_id' | 'created_at' | 'updated_at'>) => Promise<Event>;
   updateEvent: (id: string, data: Partial<Event>) => Promise<Event>;
   deleteEvent: (id: string) => Promise<void>;
@@ -29,6 +30,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   const [brands, setBrands] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [eventsFetched, setEventsFetched] = useState(false);
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -65,6 +67,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
       setError(err instanceof Error ? err.message : 'Failed to fetch events');
     } finally {
       setLoading(false);
+      setEventsFetched(true);
     }
   }, []);
 
@@ -186,6 +189,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         loading,
         error,
         fetchEvents,
+        eventsFetched,
         createEvent,
         updateEvent,
         deleteEvent,

@@ -19,18 +19,18 @@ export function useAttendeeRoute(): {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { getInviteeByToken, resolveInviteeByToken } = useInvitees();
-  const { getEvent, fetchEvents, events, loading: eventsLoading } = useEvents();
+  const { getEvent, fetchEvents, events, loading: eventsLoading, eventsFetched } = useEvents();
 
   const [resolving, setResolving] = useState(false);
   const attemptedRef = useRef(false);
 
   // Ensure events are loaded
   useEffect(() => {
-    if (!events.length && !eventsLoading) {
+    if (!events.length && !eventsLoading && !eventsFetched) {
       fetchEvents().catch(() => {});
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events.length, eventsLoading]);
+  }, [events.length, eventsLoading, eventsFetched]);
 
   const invitee = token ? getInviteeByToken(token) : undefined;
   const event = invitee ? getEvent(invitee.event_id) : undefined;

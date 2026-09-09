@@ -18,6 +18,8 @@ export default function AllEmailLogs() {
   const { events } = useEvents();
   const { emailLogs, loading, fetchEmailLogs } = useEmailLogs();
   const [preview, setPreview] = useState<EmailLog | null>(null);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -31,6 +33,28 @@ export default function AllEmailLogs() {
       return next;
     });
   };
+
+  async function openPreview(log: EmailLog) {
+    setPreview(log);
+    setPreviewHtml(null);
+    setPreviewLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3080/investconnect/email-logs/${log.id}`, {
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) {
+        setPreviewHtml(log.body);
+        return;
+      }
+      const data = await res.json();
+      const html = data?.providerDetails?.data?.htmlBody || data?.html_body || log.body;
+      setPreviewHtml(typeof html === 'string' ? html : String(html));
+    } catch (err) {
+      setPreviewHtml(log.body);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
 
   const eventGroups = events.map(event => {
     const logs = emailLogs.filter(l => l.event_id === event.id);
@@ -110,12 +134,12 @@ export default function AllEmailLogs() {
                                   <span className="text-xs text-slate-400">
                                     {new Date(log.sent_at).toLocaleDateString('en-ZA')}
                                   </span>
-                                  <button
-                                    onClick={() => setPreview(log)}
-                                    className="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors"
-                                  >
-                                    Preview
-                                  </button>
+                                        <button
+                                          onClick={() => openPreview(log)}
+                                          className="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors"
+                                        >
+                                          Preview
+                                        </button>
                                 </div>
                               </div>
                             ))}
@@ -136,10 +160,18 @@ export default function AllEmailLogs() {
           subject={preview.subject}
           toEmail={preview.to_email}
           sentAt={preview.sent_at}
-          body={preview.body}
-          onClose={() => setPreview(null)}
+          body={previewHtml ?? preview.body}
+          onClose={() => {
+            setPreview(null);
+            setPreviewHtml(null);
+            setPreviewLoading(false);
+          }}
         />
       )}
+
+      {
+        /* fetch preview HTML when opening */
+      }
     </div>
   );
 }

@@ -53,8 +53,8 @@ export interface EmailLog {
 
 export interface EventProperties {
   event_id: string;
-  pre_text: string;
-  post_text: string;
+  invitationpost: string;
+  invitationpre: string;
   catering: string;
   parking: string;
 }

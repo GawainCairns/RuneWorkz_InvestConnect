@@ -17,6 +17,7 @@ import { inviteeService } from '../../services/inviteeService';
 import type { Invitee } from '../../types/organizer';
 import { buildGoogleCalendarUrl, formatEventDate, formatEventTime } from '../../utils/attendee';
 import AttendeeLayout from './AttendeeLayout';
+import Header from '../Header';
 
 export default function ConfirmationPage() {
   const { token: paramToken } = useParams<{ token?: string }>();
@@ -110,6 +111,7 @@ export default function ConfirmationPage() {
   if (!invitee || !event) {
     return (
       <AttendeeLayout>
+        <Header />
         <div className="flex items-center justify-center min-h-screen">
           <p className="text-slate-500">Invitation not found.</p>
         </div>
@@ -173,7 +175,7 @@ export default function ConfirmationPage() {
         };
       default: // failure
         return {
-          icon: <AlertCircle className="mx-auto mb-3 w-14 h-14 text-red-500" />,
+          icon: <AlertCircle className="mx-auto mb-3 text-red-500 w-14 h-14" />,
           badgeClass: 'bg-red-100 text-red-700',
           badgeLabel: 'Payment Failed',
           heading: 'Payment failed',
@@ -185,6 +187,7 @@ export default function ConfirmationPage() {
 
   return (
     <AttendeeLayout>
+      <Header />
       <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
         <div className="w-full max-w-md">
           <div className="p-8 bg-white border shadow-lg rounded-xl border-slate-200">

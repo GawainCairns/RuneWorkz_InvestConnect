@@ -1,7 +1,6 @@
 import { Calendar, Clock, DollarSign, MapPin, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import { useEvents } from '../../contexts/EventContext';
 import { useInvitees } from '../../contexts/InviteeContext';
 import { formatEventDate, formatEventTime } from '../../utils/attendee';
@@ -14,8 +13,7 @@ export default function InvitationLanding() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { getInviteeByToken, updateInvitee, resolveInviteeByToken } = useInvitees();
-  const { token: authToken } = useAuth();
-  const { getEvent, fetchEvents, events, loading: eventsLoading } = useEvents();
+  const { getEvent, fetchEvents, events, loading: eventsLoading, eventsFetched } = useEvents();
 
   const [detailsForm, setDetailsForm] = useState({ firstname: '', lastname: '', email: '' });
   const [detailsError, setDetailsError] = useState('');
@@ -24,10 +22,10 @@ export default function InvitationLanding() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!events.length && !eventsLoading) {
+    if (!events.length && !eventsLoading && !eventsFetched) {
       fetchEvents().catch(() => {});
     }
-  }, [fetchEvents, events.length, eventsLoading]);
+  }, [fetchEvents, events.length, eventsLoading, eventsFetched]);
 
   const invitee = token ? getInviteeByToken(token) : undefined;
   const event = invitee ? getEvent(invitee.event_id) : undefined;
@@ -131,16 +129,6 @@ export default function InvitationLanding() {
       </div>
 
       <div className="max-w-2xl px-4 mx-auto -mt-6">
-        {authToken && (
-          <div className="max-w-2xl px-4 mx-auto mt-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="mb-2 text-sm font-medium text-slate-600 hover:text-slate-800"
-            >
-              ← Back
-            </button>
-          </div>
-        )}
         <div className="overflow-hidden bg-white border shadow-lg rounded-xl border-slate-200">
           <div className="grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-y-0 sm:divide-x divide-slate-100">
             <div className="flex items-center gap-3 px-5 py-4">
@@ -273,7 +261,7 @@ export default function InvitationLanding() {
                           <p className="text-xs text-slate-500">{invitee.email}</p>
                         </div>
                       </div>
-                      <div className="p-4 text-center rounded-lg bg-slate-50 border border-slate-100">
+                      <div className="p-4 text-center border rounded-lg bg-slate-50 border-slate-100">
                         <p className="text-base font-semibold text-slate-900">You declined the invitation</p>
                         <p className="text-sm text-slate-600">We're sorry you can't make it. If this was a mistake you can respond again from your invitation link.</p>
                       </div>
@@ -292,7 +280,7 @@ export default function InvitationLanding() {
                     <div className="space-y-6 text-center">
                       <h2 className="text-2xl font-bold text-slate-900">I look forward to you coming</h2>
                       <p className="text-sm text-slate-600">Thanks {invitee.firstname}, your RSVP and payment are confirmed. We look forward to seeing you at the event.</p>
-                      <div className="mt-4 p-4 rounded-lg bg-emerald-50 border border-emerald-100">
+                      <div className="p-4 mt-4 border rounded-lg bg-emerald-50 border-emerald-100">
                         <p className="text-sm font-medium text-emerald-700">Event: {event.title}</p>
                         <p className="text-xs text-emerald-700">{formatEventDate(event.date)} • {formatEventTime(event.start_time)}</p>
                       </div>
@@ -312,7 +300,7 @@ export default function InvitationLanding() {
                         <p className="text-xs text-slate-500">{invitee.email}</p>
                       </div>
                     </div>
-                    <div className="p-4 text-center rounded-lg bg-slate-50 border border-slate-100">
+                    <div className="p-4 text-center border rounded-lg bg-slate-50 border-slate-100">
                       <p className="text-base font-semibold text-slate-900">RSVP: {rsvp === 'yes' ? 'Yes' : rsvp === 'no' ? 'No' : rsvp}</p>
                       {rsvp === 'yes' && !paid && (
                         <p className="text-sm text-slate-600">You responded Yes but your payment is not yet recorded.</p>

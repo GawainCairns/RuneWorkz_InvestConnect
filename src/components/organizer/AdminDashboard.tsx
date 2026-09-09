@@ -26,12 +26,12 @@ function StatCard({ icon, label, value, color }: StatCardProps) {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { events, loading: eventsLoading, fetchEvents } = useEvents();
+  const { events, loading: eventsLoading, fetchEvents, eventsFetched } = useEvents();
   const { invitees, fetchInvitees } = useInvitees();
 
   useEffect(() => {
-    if (!events.length && !eventsLoading) fetchEvents();
-  }, [fetchEvents, events.length, eventsLoading]);
+    if (!events.length && !eventsLoading && !eventsFetched) fetchEvents();
+  }, [fetchEvents, events.length, eventsLoading, eventsFetched]);
 
   useEffect(() => {
     events.forEach(e => fetchInvitees(e.id));
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
                 { label: 'Create Event', icon: <Plus className="w-4 h-4" />, path: '/admin/events/new', color: 'bg-brand-600 text-white hover:bg-brand-700' },
                 { label: 'View All Events', icon: <Calendar className="w-4 h-4" />, path: '/admin/events', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
                 { label: 'All Email Logs', icon: <Mail className="w-4 h-4" />, path: '/admin/emails', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
-                { label: 'My Invitations', icon: <Users className="w-4 h-4" />, path: '/admin/invitee-dashboard', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
+                { label: 'My Invitations', icon: <Users className="w-4 h-4" />, path: '/invitee-dashboard', color: 'bg-slate-100 text-slate-700 hover:bg-slate-200' },
               ].map(action => (
                 <button
                   key={action.path}
