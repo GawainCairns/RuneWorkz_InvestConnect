@@ -9,18 +9,17 @@ import {
   Utensils,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEmailLogs } from '../../contexts/EmailLogContext';
-import { useEvents } from '../../contexts/EventContext';
 import { useInvitees } from '../../contexts/InviteeContext';
 import { inviteeService } from '../../services/inviteeService';
+import { useAttendeeRoute } from '../../hooks/useAttendeeRoute';
 import type { Invitee } from '../../types/organizer';
 import { buildGoogleCalendarUrl, formatEventDate, formatEventTime } from '../../utils/attendee';
 import AttendeeLayout from './AttendeeLayout';
 import Header from '../Header';
 
 export default function ConfirmationPage() {
-  const { token: paramToken } = useParams<{ token?: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -28,23 +27,18 @@ export default function ConfirmationPage() {
   // supported values: 'success' (payment or RSVP success), 'declined' (RSVP no), 'cancel' (payment cancelled), 'failure' (payment failed)
   const status = (searchParams.get('status') as 'success' | 'declined' | 'cancel' | 'failure') ?? 'success';
 
-  // Recover token from sessionStorage when redirected from payment gateway
-  const token = paramToken ?? (sessionStorage.getItem('payment_token') ?? undefined);
-
-  const { getInviteeByToken, updateInviteeLocal } = useInvitees();
-  const { getEvent } = useEvents();
+  const { token, invitee: contextInvitee, event } = useAttendeeRoute();
+  const { updateInviteeLocal } = useInvitees();
   const { logEmail } = useEmailLogs();
 
-  const contextInvitee = token ? getInviteeByToken(token) : undefined;
   const [invitee, setInvitee] = useState<Invitee | undefined>(contextInvitee);
-  const event = invitee ? getEvent(invitee.event_id) : undefined;
 
   const persistedRef = useRef(false);
   const emailedRef = useRef(false);
 
   // Clear sessionStorage payment token on payment gateway redirect
   useEffect(() => {
-    if (!paramToken && sessionStorage.getItem('payment_token')) {
+    if (!token && sessionStorage.getItem('payment_token')) {
       sessionStorage.removeItem('payment_token');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

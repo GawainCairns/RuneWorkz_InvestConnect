@@ -18,7 +18,10 @@ export default function RSVPPage() {
     setSubmitting(true);
     try {
       updateInviteeLocal(invitee.id, { rsvp_status: choice });
-      await inviteeService.updateRsvp(Number(invitee.id), { rsvpStatus: choice });
+      // Use the generic update endpoint so attendee flows don't trigger any
+      // server-side RSVP email hooks that may be executed by the special
+      // `/invitees/:id/rsvp` endpoint.
+      await inviteeService.update(Number(invitee.id), { rsvpStatus: choice });
       if (choice === 'yes') {
         navigate(`/rsvp/${token}/dietary`);
       } else {

@@ -16,7 +16,9 @@ export function useAttendeeRoute(): {
   event: Event | undefined;
   loading: boolean;
 } {
-  const { token } = useParams<{ token: string }>();
+  const params = useParams<{ token?: string }>();
+  // Prefer URL token, fall back to payment token stored in sessionStorage
+  const token = params.token ?? (sessionStorage.getItem('payment_token') ?? undefined);
   const navigate = useNavigate();
   const { getInviteeByToken, resolveInviteeByToken } = useInvitees();
   const { getEvent, fetchEvents, events, loading: eventsLoading, eventsFetched } = useEvents();

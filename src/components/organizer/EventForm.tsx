@@ -32,9 +32,17 @@ export default function EventForm() {
 
   const normalizeTime = (val: string) => {
     if (!val) return '';
-    const [h] = val.split(':');
-    const hh = String(Number(h)).padStart(2, '0');
-    return `${hh}:00`;
+    const [h, m = '0'] = val.split(':');
+    let hhNum = Number(h);
+    let mmNum = Number(m);
+    mmNum = Math.round(mmNum / 5) * 5;
+    if (mmNum === 60) {
+      mmNum = 0;
+      hhNum = (hhNum + 1) % 24;
+    }
+    const hh = String(hhNum).padStart(2, '0');
+    const mm = String(mmNum).padStart(2, '0');
+    return `${hh}:${mm}`;
   };
 
   const [showAddBrand, setShowAddBrand] = useState(false);
@@ -211,7 +219,7 @@ export default function EventForm() {
             <FormField label="Start Time" required error={errors.start_time}>
               <input
                 type="time"
-                step={3600}
+                step={300}
                 className={inputClass}
                 value={form.start_time}
                 onChange={e => update('start_time', normalizeTime(e.target.value))}
@@ -220,7 +228,7 @@ export default function EventForm() {
             <FormField label="End Time" required error={errors.end_time}>
               <input
                 type="time"
-                step={3600}
+                step={300}
                 className={inputClass}
                 value={form.end_time}
                 onChange={e => update('end_time', normalizeTime(e.target.value))}

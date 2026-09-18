@@ -20,7 +20,9 @@ export default function DietaryPage() {
     setSubmitting(true);
     try {
       updateInviteeLocal(invitee.id, { dietary: selected });
-      await inviteeService.updateRsvp(Number(invitee.id), { dietary: selected });
+      // Persist dietary selection using the generic update endpoint to avoid
+      // triggering RSVP-completion emails from the specialized RSVP route.
+      await inviteeService.update(Number(invitee.id), { dietary: selected });
     } catch {
       // continue regardless of API error
     } finally {
