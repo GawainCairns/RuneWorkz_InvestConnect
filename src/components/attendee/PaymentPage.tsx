@@ -1,8 +1,9 @@
 import { CreditCard, FileText } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInvitees } from '../../contexts/InviteeContext';
 import { apiPost } from '../../services/api';
+import { inviteeService } from '../../services/inviteeService';
 import { useAttendeeRoute } from '../../hooks/useAttendeeRoute';
 import AttendeeLayout from './AttendeeLayout';
 
@@ -15,6 +16,32 @@ export default function PaymentPage() {
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [submitting, setSubmitting] = useState(false);
+  const [savingAttendee, setSavingAttendee] = useState(true);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const saveAttemptedFor = useRef<string | null>(null);
+
+  const saveAttendee = useCallback(async () => {
+    if (!invitee) return;
+
+    setSavingAttendee(true);
+    setSaveError(null);
+    try {
+      await inviteeService.update(Number(invitee.id), {
+        rsvpStatus: invitee.rsvp_status,
+        dietary: invitee.dietary || undefined,
+      });
+      setSavingAttendee(false);
+    } catch (error) {
+      setSavingAttendee(false);
+      setSaveError(error instanceof Error ? error.message : 'Unable to save attendee details');
+    }
+  }, [invitee]);
+
+  useEffect(() => {
+    if (!invitee || !event || saveAttemptedFor.current === invitee.id) return;
+    saveAttemptedFor.current = invitee.id;
+    void saveAttendee();
+  }, [event, invitee, saveAttendee]);
 
   if (loading || !invitee || !event) {
     return (
@@ -32,6 +59,8 @@ export default function PaymentPage() {
   }
 
   const handleContinue = async () => {
+    if (savingAttendee || saveError) return;
+
     setSubmitting(true);
     try {
       if (paymentMethod === 'card') {
@@ -144,15 +173,34 @@ export default function PaymentPage() {
 
             <button
               onClick={handleContinue}
-              disabled={submitting}
+              disabled={submitting || savingAttendee || Boolean(saveError)}
               className="w-full py-3 font-semibold text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700 disabled:opacity-50"
             >
-              {submitting
+              {savingAttendee
+                ? 'Saving attendee details...'
+                : saveError
+                ? 'Attendee details not saved'
+                : submitting
                 ? 'Processing...'
                 : paymentMethod === 'card'
                 ? 'Pay Now →'
                 : 'Request Invoice →'}
             </button>
+            {saveError && (
+              <div className="mt-3 text-center">
+                <p className="text-sm text-red-600">{saveError}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveAttemptedFor.current = null;
+                    void saveAttendee();
+                  }}
+                  className="mt-2 text-sm font-semibold text-brand-700 hover:text-brand-800"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

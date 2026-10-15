@@ -19,6 +19,7 @@ This page documents the attendee-facing multi-step flow and ties each step to th
 
 ## 4 — PaymentPage
 - Purpose: Choose payment method — pay now or request an invoice.
+- When the page is reached, the attendee's RSVP and dietary details are persisted to the API before payment or invoice actions can continue. If persistence fails, the attendee can retry and cannot proceed until the save succeeds.
 - Look: amount-due card, two selectable payment method blocks with icons, prominent continue button, step indicator.
 - Component: src/components/attendee/PaymentPage.tsx
 
