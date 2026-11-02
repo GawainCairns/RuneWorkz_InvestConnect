@@ -6,6 +6,7 @@ import InvitationLanding from './components/attendee/InvitationLanding';
 import InvoiceForm from './components/attendee/InvoiceForm';
 import PaymentPage from './components/attendee/PaymentPage';
 import RSVPPage from './components/attendee/RSVPPage';
+import ThirdPartyRegistration from './components/attendee/ThirdPartyRegistration';
 import AdminLayout from './components/organizer/AdminLayout';
 import AdminDashboard from './components/organizer/AdminDashboard';
 import AllEmailLogs from './components/organizer/AllEmailLogs';
@@ -94,6 +95,8 @@ export default function App() {
                       <Route path="emails" element={<AllEmailLogs />} />
                       {/* invitee-dashboard is available at top-level for non-admins */}
                     </Route>
+                    <Route path="/event/:eventId/register" element={<ThirdPartyRegistration />} />
+                    <Route path="/event/:eventId/register/:managerId" element={<ThirdPartyRegistration />} />
                     <Route path="/rsvp/:token" element={<InvitationLanding />} />
                     <Route path="/rsvp/:token/respond" element={<RSVPPage />} />
                     <Route path="/rsvp/:token/dietary" element={<DietaryPage />} />
