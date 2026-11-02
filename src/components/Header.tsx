@@ -92,13 +92,6 @@ export default function Header() {
                 {hasAdminRole(profile) && (
                   <>
                     <button
-                      onClick={() => { setMenuOpen(false); navigate('/admin/events'); }}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      Events
-                    </button>
-                    <button
                       onClick={() => { setMenuOpen(false); navigate('/admin/emails'); }}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >

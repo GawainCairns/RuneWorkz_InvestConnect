@@ -14,7 +14,6 @@ import EmailLogs from './components/organizer/EmailLogs';
 import EventDetails from './components/organizer/EventDetails';
 import EventEditForm from './components/organizer/EventEditForm';
 import EventForm from './components/organizer/EventForm';
-import EventList from './components/organizer/EventList';
 import InviteeDashboard from './components/organizer/InviteeDashboard';
 import InviteeList from './components/organizer/InviteeList';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -86,7 +85,6 @@ export default function App() {
                           />
                     <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
                       <Route index element={<AdminDashboard />} />
-                      <Route path="events" element={<EventList />} />
                       <Route path="events/new" element={<EventForm />} />
                       <Route path="events/:eventId" element={<EventDetails />} />
                       <Route path="events/:eventId/edit" element={<EventEditForm />} />
