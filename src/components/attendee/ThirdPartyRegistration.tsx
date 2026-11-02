@@ -96,7 +96,7 @@ export default function ThirdPartyRegistration() {
         eventId: Number(eventId),
         firstname: form.firstname.trim(),
         surname: form.lastname.trim(),
-        email: form.email.trim(),
+        email: consent ? form.email.trim() : null,
         company: form.company.trim() || undefined,
         managerId: managerId ? Number(managerId) : undefined,
         rsvpStatus: 'pending',
