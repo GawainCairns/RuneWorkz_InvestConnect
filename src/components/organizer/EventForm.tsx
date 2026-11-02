@@ -247,7 +247,7 @@ export default function EventForm() {
           </FormField>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <FormField label="Price (USD)" required error={errors.price}>
+            <FormField label="Price (R)" required error={errors.price}>
               <input
                 type="number"
                 min="0.01"

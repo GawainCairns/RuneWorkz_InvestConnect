@@ -301,7 +301,7 @@ export default function EventEditForm() {
           </FormField>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <FormField label="Price (USD)" hint="Leave empty or 0 for free" error={errors.price}>
+            <FormField label="Price (R)" hint="Leave empty or 0 for free" error={errors.price}>
               <input type="number" min="0" step="0.01" className={inputClass} placeholder="0.00" value={form.price} onChange={e => update('price', e.target.value)} />
             </FormField>
             <FormField label="Capacity" hint="Leave empty for unlimited" error={errors.capacity}>

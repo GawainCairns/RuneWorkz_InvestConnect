@@ -1,4 +1,4 @@
-import { Check, Copy, DollarSign, Mail, UtensilsCrossed } from 'lucide-react';
+import { Check, Coins, Copy, Mail, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
 import { useAlert } from '../../contexts/AlertContext';
 import { useEmailLogs } from '../../contexts/EmailLogContext';
@@ -138,7 +138,7 @@ export default function InviteeTable({ eventId, invitees }: InviteeTableProps) {
                       title="Mark as paid"
                       className="p-1.5 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
                     >
-                      <DollarSign className="w-4 h-4" />
+                      <Coins className="w-4 h-4" />
                     </button>
                   )}
                 </div>

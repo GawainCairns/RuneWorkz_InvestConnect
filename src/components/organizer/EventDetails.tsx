@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, Clock, DollarSign, CreditCard as Edit, Mail, MapPin, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Coins, CreditCard as Edit, Mail, MapPin, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEmailLogs } from '../../contexts/EmailLogContext';
@@ -144,8 +144,8 @@ export default function EventDetails() {
             </div>
             {event.price > 0 && (
               <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg text-sm font-semibold shrink-0">
-                <DollarSign className="w-4 h-4" />
-                {event.price.toFixed(2)}
+                <Coins className="w-4 h-4" />
+                R {event.price.toFixed(2)}
               </div>
             )}
           </div>

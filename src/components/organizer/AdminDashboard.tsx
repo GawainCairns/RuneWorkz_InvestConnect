@@ -1,4 +1,4 @@
-import { Calendar, CheckCircle, DollarSign, Mail, Plus, Users } from 'lucide-react';
+import { Calendar, CheckCircle, Coins, Mail, Plus, Users } from 'lucide-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../../contexts/EventContext';
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
           color="bg-emerald-50"
         />
         <StatCard
-          icon={<DollarSign className="w-5 h-5 text-amber-600" />}
+          icon={<Coins className="w-5 h-5 text-amber-600" />}
           label="Paid"
           value={totalPaid}
           color="bg-amber-50"

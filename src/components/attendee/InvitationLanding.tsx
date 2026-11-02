@@ -1,4 +1,4 @@
-import { Calendar, Clock, DollarSign, MapPin, User } from 'lucide-react';
+import { Calendar, Clock, Coins, MapPin, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEvents } from '../../contexts/EventContext';
@@ -158,7 +158,7 @@ export default function InvitationLanding() {
 
           {event.price > 0 && (
             <div className="flex items-center gap-2 px-5 py-3 border-t border-slate-100 bg-emerald-50">
-              <DollarSign className="w-4 h-4 text-emerald-600" />
+              <Coins className="w-4 h-4 text-emerald-600" />
               <span className="text-sm font-semibold text-emerald-700">
                 Ticket price: R {event.price.toFixed(2)}
               </span>
