@@ -142,10 +142,14 @@ export default function EventDetails() {
                 <p className="text-slate-500 mt-1.5 text-sm">{event.description}</p>
               )}
             </div>
-            {event.price > 0 && (
+            {event.price > 0 ? (
               <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg text-sm font-semibold shrink-0">
                 <Coins className="w-4 h-4" />
                 R {event.price.toFixed(2)}
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg text-sm font-semibold shrink-0">
+                Free
               </div>
             )}
           </div>

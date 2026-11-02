@@ -63,10 +63,14 @@ export default function EventCard({
             </span>
             <h3 className="text-base font-semibold leading-tight text-slate-900">{event.title}</h3>
           </div>
-          {event.price > 0 && (
+          {event.price > 0 ? (
             <div className="flex items-center gap-1 text-sm font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg shrink-0">
               <span className="text-sm font-semibold">R</span>
               {event.price.toFixed(0)}
+            </div>
+          ) : (
+            <div className="flex items-center text-sm font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
+              Free
             </div>
           )}
         </div>

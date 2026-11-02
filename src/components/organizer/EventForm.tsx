@@ -57,7 +57,7 @@ export default function EventForm() {
     if (!form.start_time) errs.start_time = 'Start time is required';
     if (!form.end_time) errs.end_time = 'End time is required';
     if (!form.location.trim()) errs.location = 'Location is required';
-    if (form.price === '' || isNaN(Number(form.price)) || Number(form.price) <= 0) errs.price = 'Price is required and must be greater than 0';
+    if (form.price === '' || isNaN(Number(form.price)) || Number(form.price) < 0) errs.price = 'Price must be 0 or greater'
     if (form.capacity === '' || isNaN(Number(form.capacity)) || Number(form.capacity) <= 0) errs.capacity = 'Capacity is required and must be greater than 0';
     return errs;
   };
@@ -247,10 +247,10 @@ export default function EventForm() {
           </FormField>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <FormField label="Price (R)" required error={errors.price}>
+            <FormField label="Price (R)" required hint="Enter 0 for a free event" error={errors.price}>
               <input
                 type="number"
-                min="0.01"
+                min="0"
                 step="0.01"
                 className={inputClass}
                 placeholder="0.00"

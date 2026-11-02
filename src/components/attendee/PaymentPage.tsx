@@ -58,6 +58,11 @@ export default function PaymentPage() {
     return null;
   }
 
+  if (event.price <= 0) {
+    navigate(`/rsvp/${token}/confirmation?status=success`);
+    return null;
+  }
+
   const handleContinue = async () => {
     if (savingAttendee || saveError) return;
 

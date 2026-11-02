@@ -156,11 +156,17 @@ export default function InvitationLanding() {
             </div>
           </div>
 
-          {event.price > 0 && (
+          {event.price > 0 ? (
             <div className="flex items-center gap-2 px-5 py-3 border-t border-slate-100 bg-emerald-50">
               <Coins className="w-4 h-4 text-emerald-600" />
               <span className="text-sm font-semibold text-emerald-700">
                 Ticket price: R {event.price.toFixed(2)}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-5 py-3 border-t border-slate-100 bg-slate-50">
+              <span className="text-sm font-semibold text-slate-500">
+                Free event
               </span>
             </div>
           )}
@@ -223,7 +229,7 @@ export default function InvitationLanding() {
               {(() => {
                 const rsvpRaw = invitee.rsvp_status;
                 const rsvp = rsvpRaw === 'confirmed' ? 'yes' : rsvpRaw === 'declined' ? 'no' : rsvpRaw;
-                const paid = invitee.payment_status === 'paid';
+                const paid = invitee.payment_status === 'paid' || event.price <= 0;
 
                 if (rsvp === 'pending') {
                   return (
@@ -279,7 +285,7 @@ export default function InvitationLanding() {
                   return (
                     <div className="space-y-6 text-center">
                       <h2 className="text-2xl font-bold text-slate-900">I look forward to you coming</h2>
-                      <p className="text-sm text-slate-600">Thanks {invitee.firstname}, your RSVP and payment are confirmed. We look forward to seeing you at the event.</p>
+                      <p className="text-sm text-slate-600">Thanks {invitee.firstname}, your RSVP{event.price > 0 ? ' and payment' : ''} {event.price > 0 ? 'are' : 'is'} confirmed. We look forward to seeing you at the event.</p>
                       <div className="p-4 mt-4 border rounded-lg bg-emerald-50 border-emerald-100">
                         <p className="text-sm font-medium text-emerald-700">Event: {event.title}</p>
                         <p className="text-xs text-emerald-700">{formatEventDate(event.date)} • {formatEventTime(event.start_time)}</p>

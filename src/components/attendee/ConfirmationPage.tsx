@@ -51,7 +51,6 @@ export default function ConfirmationPage() {
 
     inviteeService.getById(Number(contextInvitee.id)).then(res => {
       const i = res.invitee;
-      const isPaidEvent = event ? event.price > 0 : false;
       const fresh: Invitee = {
         id: String(i.id),
         event_id: String(i.eventId),
@@ -61,7 +60,7 @@ export default function ConfirmationPage() {
         dietary: i.dietary || contextInvitee.dietary,
         rsvp_status: (i.rsvpStatus as any) || contextInvitee.rsvp_status,
         payment_status:
-          status === 'success' && isPaidEvent
+          status === 'success'
             ? 'paid'
             : ((i.paymentStatus as any) || contextInvitee.payment_status),
         invite_token: (i.inviteCode as any) || contextInvitee.invite_token,
@@ -69,9 +68,11 @@ export default function ConfirmationPage() {
       };
       setInvitee(fresh);
       updateInviteeLocal(fresh.id, fresh);
+      if (status === 'success') {
+        inviteeService.update(Number(contextInvitee.id), { paymentStatus: 'paid' }).catch(() => {});
+      }
     }).catch(() => {
-      // On API error: optimistically apply paid status for payment success
-      if (status === 'success' && event && event.price > 0) {
+      if (status === 'success') {
         updateInviteeLocal(contextInvitee.id, { payment_status: 'paid' });
         setInvitee(prev => prev ? { ...prev, payment_status: 'paid' } : prev);
       }
@@ -204,14 +205,12 @@ export default function ConfirmationPage() {
                   {rsvpDisplay.label}
                 </span>
               </div>
-              {event.price > 0 && (
-                <div className="flex-1 px-3 py-2.5 border rounded-lg bg-slate-50 border-slate-200 text-center">
-                  <p className="mb-1 text-xs text-slate-500">Payment</p>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${paymentDisplay.color}`}>
-                    {paymentDisplay.label}
-                  </span>
-                </div>
-              )}
+              <div className="flex-1 px-3 py-2.5 border rounded-lg bg-slate-50 border-slate-200 text-center">
+                <p className="mb-1 text-xs text-slate-500">{event.price > 0 ? 'Payment' : 'Status'}</p>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${paymentDisplay.color}`}>
+                  {paymentDisplay.label}
+                </span>
+              </div>
             </div>
 
             {/* ── Event Details ─────────────────────────────── */}
