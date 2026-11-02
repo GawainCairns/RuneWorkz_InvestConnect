@@ -34,22 +34,26 @@ export function generateAttendancePDF(event: any, invitees: any[]) {
   // Draw table header
   const marginLeft = 14;
   const tableWidth = pageWidth - marginLeft * 2;
-  const nameColWidth = tableWidth - 30; // leave 30mm for attendance column
-  const attendColWidth = 30;
-  const rowHeight = 8;
+  const nameColWidth = tableWidth * 0.5;
+  const signInColWidth = tableWidth * 0.25;
+  const signOutColWidth = tableWidth * 0.25;
+  const rowHeight = 20; // taller rows for signature space
 
   // header box
   doc.setDrawColor(0);
   doc.setLineWidth(0.2);
   doc.rect(marginLeft, y - 6, nameColWidth, rowHeight, 'S');
-  doc.rect(marginLeft + nameColWidth, y - 6, attendColWidth, rowHeight, 'S');
+  doc.rect(marginLeft + nameColWidth, y - 6, signInColWidth, rowHeight, 'S');
+  doc.rect(marginLeft + nameColWidth + signInColWidth, y - 6, signOutColWidth, rowHeight, 'S');
   // header captions bold and centered
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   const nameHeaderX = marginLeft + nameColWidth / 2;
-  const markHeaderX = marginLeft + nameColWidth + attendColWidth / 2;
+  const signInHeaderX = marginLeft + nameColWidth + signInColWidth / 2;
+  const signOutHeaderX = marginLeft + nameColWidth + signInColWidth + signOutColWidth / 2;
   doc.text('Name', nameHeaderX, y, { align: 'center' });
-  doc.text('Mark', markHeaderX, y, { align: 'center' });
+  doc.text('Sign In', signInHeaderX, y, { align: 'center' });
+  doc.text('Sign Out', signOutHeaderX, y, { align: 'center' });
   doc.setFont('helvetica', 'normal');
   y += rowHeight;
 
@@ -58,6 +62,16 @@ export function generateAttendancePDF(event: any, invitees: any[]) {
     if (y + rowHeight > 287) { // leave small bottom margin
       doc.addPage();
       y = 20;
+      // redraw header on new page
+      doc.rect(marginLeft, y - 6, nameColWidth, rowHeight, 'S');
+      doc.rect(marginLeft + nameColWidth, y - 6, signInColWidth, rowHeight, 'S');
+      doc.rect(marginLeft + nameColWidth + signInColWidth, y - 6, signOutColWidth, rowHeight, 'S');
+      doc.setFont('helvetica', 'bold');
+      doc.text('Name', nameHeaderX, y, { align: 'center' });
+      doc.text('Sign In', signInHeaderX, y, { align: 'center' });
+      doc.text('Sign Out', signOutHeaderX, y, { align: 'center' });
+      doc.setFont('helvetica', 'normal');
+      y += rowHeight;
     }
 
     const name = `${safeText(inv.firstname || inv.name || inv.first || '')} ${safeText(inv.lastname || inv.surname || inv.last || '')}`.trim();
@@ -65,17 +79,13 @@ export function generateAttendancePDF(event: any, invitees: any[]) {
 
     // draw cells
     doc.rect(marginLeft, y - 6, nameColWidth, rowHeight, 'S');
-    doc.rect(marginLeft + nameColWidth, y - 6, attendColWidth, rowHeight, 'S');
+    doc.rect(marginLeft + nameColWidth, y - 6, signInColWidth, rowHeight, 'S');
+    doc.rect(marginLeft + nameColWidth + signInColWidth, y - 6, signOutColWidth, rowHeight, 'S');
 
-    // name text
-    doc.setFontSize(10).text(displayName, marginLeft + 3, y);
+    // name text (vertically centered)
+    doc.setFontSize(10).text(displayName, marginLeft + 3, y - 6 + rowHeight / 2 + 1);
 
-    // small blank box centered in attendance cell for printing mark
-    const boxSize = 6;
-    const boxX = marginLeft + nameColWidth + (attendColWidth - boxSize) / 2;
-    const boxY = y - 6 + (rowHeight - boxSize) / 2;
-    doc.rect(boxX, boxY, boxSize, boxSize, 'S');
-
+    // blank space for signatures (no box inside, the cell itself is the signature area)
     y += rowHeight;
   });
 

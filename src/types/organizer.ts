@@ -32,6 +32,8 @@ export interface Invitee {
   firstname: string;
   lastname: string;
   dietary: string;
+  company?: string;
+  manager_id?: string | null;
   // accept both older 'yes'/'no' and attendee-facing 'confirmed'/'declined'
   rsvp_status: 'pending' | 'yes' | 'no' | 'confirmed' | 'declined';
   payment_status: 'unpaid' | 'paid' | 'invoice-issued';

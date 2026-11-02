@@ -1,4 +1,4 @@
-import { ArrowLeft, RotateCcw, Save } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Save, Upload } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { MouseEvent, KeyboardEvent } from 'react';
 import { useParams } from 'react-router-dom';
@@ -31,8 +31,6 @@ function buildPreview(event: { brand: string; title: string; description: string
         <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0;" />
         <p><strong>Location:</strong> ${event.location}</p>
         <p><strong>Date:</strong> ${event.date}</p>
-        ${props.catering ? `<p><strong>Catering:</strong> ${props.catering}</p>` : ''}
-        ${props.parking ? `<p><strong>Parking:</strong> ${props.parking}</p>` : ''}
         ${props.invitationpost ? `<p>${props.invitationpost}</p>` : ''}
         <div style="margin-top:24px;text-align:center;">
           <a href="#" style="background:#2563eb;color:white;padding:12px 32px;border-radius:6px;text-decoration:none;font-weight:600;">RSVP Now</a>
@@ -42,11 +40,47 @@ function buildPreview(event: { brand: string; title: string; description: string
   `;
 }
 
+function FileUploadField({ label, id }: { label: string; id: string }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>
+      <input
+        ref={fileRef}
+        id={id}
+        type="file"
+        className="hidden"
+        onChange={e => {
+          const file = e.target.files?.[0];
+          setFileName(file ? file.name : null);
+        }}
+      />
+      <div
+        onClick={() => fileRef.current?.click()}
+        className="p-4 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-slate-300 hover:border-brand-400 hover:bg-brand-50"
+      >
+        {fileName ? (
+          <div className="flex items-center justify-center gap-2 text-sm text-slate-700">
+            <Upload className="w-4 h-4 text-brand-600" />
+            <span className="font-medium">{fileName}</span>
+          </div>
+        ) : (
+          <>
+            <Upload className="w-5 h-5 mx-auto mb-1.5 text-slate-400" />
+            <p className="text-sm text-slate-500">Click to upload</p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function EmailEditPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const { getEvent } = useEvents();
   const [props, setProps] = useState<Omit<EventProperties, 'event_id'>>(defaultProps);
-  // Always show preview
   const [saved, setSaved] = useState(false);
   const [remotePreviewHtml, setRemotePreviewHtml] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -84,7 +118,6 @@ export default function EmailEditPage() {
   useEffect(() => {
     if (!eventId) return;
     let mounted = true;
-    // Prefer properties from backend, fall back to localStorage
     (async () => {
       try {
         const res = await eventService.getById(Number(eventId));
@@ -98,7 +131,6 @@ export default function EmailEditPage() {
             else propsFromApi[p.name] = p.value ?? '';
           });
         }
-        // prefer server event fields for date/time if available
         if (apiEvent) {
           if (apiEvent.date) propsFromApi.date = apiEvent.date;
           if (apiEvent.startTime) propsFromApi.start_time = apiEvent.startTime;
@@ -107,12 +139,11 @@ export default function EmailEditPage() {
 
         if (mounted && Object.keys(propsFromApi).length) {
           setProps(prev => ({ ...prev, ...propsFromApi } as any));
-          // also mirror into localStorage
           localStorage.setItem(`event_props_${eventId}`, JSON.stringify({ ...(props as any), ...propsFromApi }));
           return;
         }
       } catch {
-        // ignore backend failures and fall back to localStorage
+        // ignore backend failures
       }
 
       const stored = localStorage.getItem(`event_props_${eventId}`);
@@ -158,13 +189,10 @@ export default function EmailEditPage() {
   const handleSave = async () => {
     if (!eventId) return;
     try {
-      // fetch existing properties for event
       const existingRes = await eventService.getById(Number(eventId));
       const apiEvent = (existingRes && (existingRes as any).event) as any;
       const existingProps = Array.isArray(apiEvent?.properties) ? apiEvent.properties : [];
 
-      // for each controlled prop, update if exists, otherwise create
-      // include event date/time when saving so server preview has them
       const augmented = {
         ...(props as Record<string, string>),
         date: event?.date ?? '',
@@ -174,7 +202,6 @@ export default function EmailEditPage() {
       const entries = Object.entries(augmented) as [string, string][];
       await Promise.all(
         entries.map(async ([name, value]) => {
-          // map local field names to server property keys for pre/post text
           const propName = name === 'invitationpre' ? 'invitationpre' : name === 'invitationpost' ? 'invitationpost' : name;
           const found = existingProps.find((p: any) => p.name === propName);
           if (found) {
@@ -185,14 +212,11 @@ export default function EmailEditPage() {
         })
       );
 
-      // mirror into localStorage for quick access
       localStorage.setItem(`event_props_${eventId}`, JSON.stringify(props));
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-      // refresh preview after saving so changes are visible
       void refreshPreview();
     } catch (err) {
-      // failed to persist — keep data locally and show brief error in console
       console.error('Failed to save event properties', err);
       localStorage.setItem(`event_props_${eventId}`, JSON.stringify(props));
     }
@@ -239,7 +263,6 @@ export default function EmailEditPage() {
                 confirmTimeout.current = window.setTimeout(() => setConfirmingReset(false), 5000) as unknown as number;
                 return;
               }
-              // confirmed
               handleClear();
               setConfirmingReset(false);
               if (confirmTimeout.current) {
@@ -270,6 +293,12 @@ export default function EmailEditPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="p-6 space-y-5 bg-white border shadow-sm rounded-xl border-slate-200">
+          {/* Top file uploads */}
+          <div className="grid grid-cols-2 gap-4">
+            <FileUploadField label="Header Image 1" id="header-img-1" />
+            <FileUploadField label="Header Image 2" id="header-img-2" />
+          </div>
+
           <FormField label="Pre-Text" hint="Opening paragraph before event details">
             <textarea
               className={`${inputClass} resize-none`}
@@ -288,24 +317,12 @@ export default function EmailEditPage() {
               onChange={e => update('invitationpost', e.target.value)}
             />
           </FormField>
-          <FormField label="Catering" hint="Details about food and beverages">
-            <input
-              type="text"
-              className={inputClass}
-              placeholder="Cocktails and canapes will be served"
-              value={props.catering}
-              onChange={e => update('catering', e.target.value)}
-            />
-          </FormField>
-          <FormField label="Parking" hint="Parking information for guests">
-            <input
-              type="text"
-              className={inputClass}
-              placeholder="Free parking available at the venue"
-              value={props.parking}
-              onChange={e => update('parking', e.target.value)}
-            />
-          </FormField>
+
+          {/* Bottom file uploads */}
+          <div className="grid grid-cols-2 gap-4">
+            <FileUploadField label="Footer Image 1" id="footer-img-1" />
+            <FileUploadField label="Footer Image 2" id="footer-img-2" />
+          </div>
         </div>
 
         <div className="overflow-hidden bg-white border shadow-sm rounded-xl border-slate-200">

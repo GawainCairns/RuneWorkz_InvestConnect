@@ -1,4 +1,4 @@
-import { Check, Coins, Copy, Mail, UtensilsCrossed } from 'lucide-react';
+import { Check, Coins, Copy, Mail, User, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
 import { useAlert } from '../../contexts/AlertContext';
 import { useEmailLogs } from '../../contexts/EmailLogContext';
@@ -82,6 +82,7 @@ export default function InviteeTable({ eventId, invitees }: InviteeTableProps) {
           <tr className="border-b border-slate-200">
             <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">Name</th>
             <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">Email</th>
+            <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">Company</th>
             <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">RSVP</th>
             <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">Payment</th>
             <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">Dietary</th>
@@ -95,6 +96,16 @@ export default function InviteeTable({ eventId, invitees }: InviteeTableProps) {
                 {invitee.firstname} {invitee.lastname}
               </td>
               <td className="py-3 px-4 text-slate-600">{invitee.email}</td>
+              <td className="py-3 px-4 text-slate-600">
+                {(invitee as any).company ? (
+                  <span className="flex items-center gap-1">
+                    <User className="w-3.5 h-3.5 text-slate-400" />
+                    {(invitee as any).company}
+                  </span>
+                ) : (
+                  <span className="text-slate-400">—</span>
+                )}
+              </td>
               <td className="py-3 px-4">
                 <StatusBadge value={invitee.rsvp_status} positive="confirmed" negative="declined" />
               </td>
