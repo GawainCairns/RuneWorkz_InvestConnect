@@ -23,6 +23,16 @@ export interface BrandProperty {
   updatedAt: string;
 }
 
+// ─── Managers ─────────────────────────────────────────────────────────────────
+
+export interface Manager {
+  id: number;
+  eventId: number;
+  name: string;
+  thirdPartyLink: string;
+  email: string;
+}
+
 // ─── Events ───────────────────────────────────────────────────────────────────
 
 export interface ApiEvent {
@@ -70,7 +80,9 @@ export interface ApiInvitee {
   firstname: string;
   surname: string;
   name: string;
-  email: string;
+  email: string | null;
+  company: string | null;
+  managerId: number | null;
   rsvpStatus: string;
   dietary: string | null;
   paymentStatus: string;
@@ -82,7 +94,9 @@ export interface CreateInviteePayload {
   eventId: number;
   firstname: string;
   surname: string;
-  email: string;
+  email?: string | null;
+  company?: string | null;
+  managerId?: number | null;
   rsvpStatus?: string;
   dietary?: string;
   paymentStatus?: string;

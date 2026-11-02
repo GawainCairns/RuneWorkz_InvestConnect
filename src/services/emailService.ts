@@ -3,6 +3,8 @@ import { TOKEN_STORAGE_KEY } from '../config/constants';
 
 export type EmailTemplate = 'invite' | 'resend' | 'rsvp_complete';
 
+// invite, resend and rsvp_complete reject invitees without an email with
+// 400 { "error": "Invitee has no email address" }; nothing is sent or logged.
 export const emailService = {
   sendInvite(inviteeId: number): Promise<{ success: boolean; result: Record<string, unknown> }> {
     return apiPost(`/email/invite/${inviteeId}`);
