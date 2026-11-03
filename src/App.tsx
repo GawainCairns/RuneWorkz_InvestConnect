@@ -95,8 +95,8 @@ export default function App() {
                       <Route path="emails" element={<AllEmailLogs />} />
                       {/* invitee-dashboard is available at top-level for non-admins */}
                     </Route>
-                    <Route path="/event/:eventId/register" element={<ThirdPartyRegistration />} />
-                    <Route path="/event/:eventId/register/:managerId" element={<ThirdPartyRegistration />} />
+                    <Route path="/event/register/:code" element={<ThirdPartyRegistration />} />
+                    <Route path="/event/reg/:managerCode" element={<ThirdPartyRegistration />} />
                     <Route path="/rsvp/:token" element={<InvitationLanding />} />
                     <Route path="/rsvp/:token/respond" element={<RSVPPage />} />
                     <Route path="/rsvp/:token/dietary" element={<DietaryPage />} />

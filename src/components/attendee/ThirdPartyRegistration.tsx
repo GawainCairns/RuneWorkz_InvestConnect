@@ -1,7 +1,7 @@
 import { Calendar, Check, ChevronDown, Clock, MapPin, Shield, TrendingUp, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { eventService } from '../../services/eventService';
+import { eventService, eventPropertyService } from '../../services/eventService';
 import { inviteeService } from '../../services/inviteeService';
 import { managerService } from '../../services/managerService';
 import type { ApiEvent } from '../../types/api';
@@ -12,8 +12,17 @@ const inputClass =
   'w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors';
 
 export default function ThirdPartyRegistration() {
-  const { eventId, managerId } = useParams<{ eventId: string; managerId?: string }>();
+  const { eventId: routeEventId, managerId: routeManagerId, code, managerCode } = useParams<{
+    eventId?: string;
+    managerId?: string;
+    code?: string;
+    managerCode?: string;
+  }>();
   const navigate = useNavigate();
+  const [resolvedEventId, setResolvedEventId] = useState<string | undefined>(routeEventId);
+  const [resolvedManagerId, setResolvedManagerId] = useState<string | undefined>(routeManagerId);
+  const eventId = routeEventId ?? resolvedEventId;
+  const managerId = routeManagerId ?? resolvedManagerId;
 
   const [event, setEvent] = useState<ApiEvent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,6 +39,58 @@ export default function ThirdPartyRegistration() {
   const [consent, setConsent] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+
+  // Links of the form /event/register/:code carry the third_party_link property value instead of the event id.
+  useEffect(() => {
+    if (routeEventId || !code) return;
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+    eventPropertyService
+      .getAll()
+      .then(res => {
+        const match = res.eventsProperties.find(p => p.name === 'third_party_link' && p.value === code);
+        if (!mounted) return;
+        if (match) setResolvedEventId(String(match.eventId));
+        else {
+          setError('This registration link is invalid or no longer available.');
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setError('This registration link is invalid or no longer available.');
+        setLoading(false);
+      });
+    return () => { mounted = false; };
+  }, [routeEventId, code]);
+
+  // /event/reg/:managerCode carries a manager's third_party_link, which identifies both the manager and the event.
+  useEffect(() => {
+    if (!managerCode) return;
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+    managerService
+      .getAll()
+      .then(res => {
+        const mgr = res.managers.find(m => m.thirdPartyLink === managerCode);
+        if (!mounted) return;
+        if (mgr) {
+          setResolvedManagerId(String(mgr.id));
+          setResolvedEventId(String(mgr.eventId));
+        } else {
+          setError('This registration link is invalid or no longer available.');
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setError('This registration link is invalid or no longer available.');
+        setLoading(false);
+      });
+    return () => { mounted = false; };
+  }, [managerCode]);
 
   useEffect(() => {
     if (!eventId) return;

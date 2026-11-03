@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, Clock, Coins, CreditCard as Edit, Mail, MapPin, Send, UserPlus, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Coins, CreditCard as Edit, Link2, Mail, MapPin, Send, UserPlus, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAlert } from '../../contexts/AlertContext';
@@ -57,6 +57,7 @@ export default function EventDetails() {
   // Email template setup check
   const [emailTemplateReady, setEmailTemplateReady] = useState(false);
   const [checkingTemplate, setCheckingTemplate] = useState(true);
+  const [thirdPartyLink, setThirdPartyLink] = useState('');
 
   // Managers state
   const [managers, setManagers] = useState<Manager[]>([]);
@@ -75,6 +76,7 @@ export default function EventDetails() {
   };
 
   const event = eventId ? getEvent(eventId) : undefined;
+  const thirdPartyUrl = `${window.location.origin}/event/register/${encodeURIComponent(thirdPartyLink)}`;
 
   useEffect(() => {
     if (eventId) {
@@ -93,7 +95,7 @@ export default function EventDetails() {
     }
   }, [activeTab, eventId, fetchEmailLogs]);
 
-  // Check whether the email template has been set up (has invitationpre or invitationpost properties)
+  // Check whether the email template is complete (both invitationpre and invitationpost are filled in)
   useEffect(() => {
     if (!eventId) return;
     let mounted = true;
@@ -103,6 +105,8 @@ export default function EventDetails() {
       .then(res => {
         const apiEvent = (res as any)?.event;
         const props = Array.isArray(apiEvent?.properties) ? apiEvent.properties : [];
+        const link = props.find((p: any) => p.name === 'third_party_link')?.value;
+        if (mounted) setThirdPartyLink(typeof link === 'string' ? link.trim() : '');
         const hasPre = props.some((p: any) => p.name === 'invitationpre' && p.value && p.value.trim());
         const hasPost = props.some((p: any) => p.name === 'invitationpost' && p.value && p.value.trim());
         const stored = localStorage.getItem(`event_props_${eventId}`);
@@ -110,10 +114,10 @@ export default function EventDetails() {
         if (stored) {
           try {
             const parsed = JSON.parse(stored);
-            if (parsed.invitationpre?.trim() || parsed.invitationpost?.trim()) storedHasContent = true;
+            if (parsed.invitationpre?.trim() && parsed.invitationpost?.trim()) storedHasContent = true;
           } catch { /* ignore */ }
         }
-        if (mounted) setEmailTemplateReady(hasPre || hasPost || storedHasContent);
+        if (mounted) setEmailTemplateReady((hasPre && hasPost) || storedHasContent);
       })
       .catch(() => {
         if (mounted) {
@@ -122,7 +126,7 @@ export default function EventDetails() {
           if (stored) {
             try {
               const parsed = JSON.parse(stored);
-              if (parsed.invitationpre?.trim() || parsed.invitationpost?.trim()) storedHasContent = true;
+              if (parsed.invitationpre?.trim() && parsed.invitationpost?.trim()) storedHasContent = true;
             } catch { /* ignore */ }
           }
           setEmailTemplateReady(storedHasContent);
@@ -332,6 +336,30 @@ export default function EventDetails() {
             </div>
           </div>
 
+          {thirdPartyLink && (
+            <div className="flex items-center gap-2.5 text-sm text-slate-600 mb-6 min-w-0">
+              <Link2 className="w-4 h-4 text-slate-400 shrink-0" />
+              <span className="shrink-0">RSVP link:</span>
+              <a
+                href={thirdPartyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="truncate text-brand-600 hover:underline"
+              >
+                {thirdPartyUrl}
+              </a>
+              <button
+                onClick={() => {
+                  navigator.clipboard?.writeText(thirdPartyUrl);
+                  showAlert('RSVP link copied', 'success');
+                }}
+                className="text-xs font-medium shrink-0 text-brand-600 hover:underline"
+              >
+                Copy
+              </button>
+            </div>
+          )}
+
           {!isPast && (
             <div className="grid grid-cols-3 gap-4">
               <div className="px-4 py-3 text-center rounded-lg bg-slate-50">
@@ -480,9 +508,13 @@ export default function EventDetails() {
                             <td className="py-3 px-4 font-medium text-slate-900">{mgr.name}</td>
                             <td className="py-3 px-4 text-slate-600">{mgr.email}</td>
                             <td className="py-3 px-4 text-slate-600">
-                              <span className="text-xs text-brand-600">
-                                {window.location.origin}/event/{eventId}/register/{mgr.id}
-                              </span>
+                              {mgr.thirdPartyLink ? (
+                                <span className="text-xs text-brand-600">
+                                  {window.location.origin}/event/reg/{encodeURIComponent(mgr.thirdPartyLink)}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-slate-400">No link yet</span>
+                              )}
                             </td>
                             <td className="py-3 px-4 text-right">
                               <button

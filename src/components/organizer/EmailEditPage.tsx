@@ -7,6 +7,7 @@ import type { EventProperties } from '../../types/organizer';
 import FormField from './FormField';
 import { emailService } from '../../services/emailService';
 import { eventService, eventPropertyService } from '../../services/eventService';
+import { imageService } from '../../services/imageService';
 
 const inputClass =
   'w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors';
@@ -40,9 +41,45 @@ function buildPreview(event: { brand: string; title: string; description: string
   `;
 }
 
-function FileUploadField({ label, id }: { label: string; id: string }) {
+function FileUploadField({
+  label,
+  id,
+  eventId,
+  propertyName,
+  imageCode,
+  onUploaded,
+}: {
+  label: string;
+  id: string;
+  eventId?: number;
+  propertyName: string;
+  imageCode?: string;
+  onUploaded?: (propertyName: string, imageCode: string) => void;
+}) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = async (file: File | undefined) => {
+    setError(null);
+    if (!file || !eventId) {
+      setFileName(null);
+      return;
+    }
+    setUploading(true);
+    try {
+      const res = await imageService.upload(file, { folder: 'events', eventId, name: propertyName });
+      setFileName(file.name);
+      onUploaded?.(propertyName, res.image_code);
+    } catch (err: any) {
+      setFileName(null);
+      setError(String(err?.message ?? err));
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
 
   return (
     <div>
@@ -51,17 +88,23 @@ function FileUploadField({ label, id }: { label: string; id: string }) {
         ref={fileRef}
         id={id}
         type="file"
+        accept="image/*"
         className="hidden"
-        onChange={e => {
-          const file = e.target.files?.[0];
-          setFileName(file ? file.name : null);
-        }}
+        onChange={e => void handleChange(e.target.files?.[0])}
       />
       <div
-        onClick={() => fileRef.current?.click()}
+        onClick={() => !uploading && fileRef.current?.click()}
         className="p-4 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-slate-300 hover:border-brand-400 hover:bg-brand-50"
       >
-        {fileName ? (
+        {uploading ? (
+          <p className="text-sm text-slate-500">Uploading…</p>
+        ) : imageCode && !fileName ? (
+          <img
+            src={imageService.buildUrl(imageCode, { w: 200 })}
+            alt={label}
+            className="mx-auto max-h-20"
+          />
+        ) : fileName ? (
           <div className="flex items-center justify-center gap-2 text-sm text-slate-700">
             <Upload className="w-4 h-4 text-brand-600" />
             <span className="font-medium">{fileName}</span>
@@ -73,13 +116,23 @@ function FileUploadField({ label, id }: { label: string; id: string }) {
           </>
         )}
       </div>
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
 }
 
+const IMAGE_FIELDS = [
+  { name: 'top_image_1', label: 'Header Image 1', id: 'header-img-1' },
+  { name: 'top_image_2', label: 'Header Image 2', id: 'header-img-2' },
+  { name: 'bottom_image_1', label: 'Footer Image 1', id: 'footer-img-1' },
+  { name: 'bottom_image_2', label: 'Footer Image 2', id: 'footer-img-2' },
+] as const;
+const IMAGE_NAMES: string[] = IMAGE_FIELDS.map(f => f.name);
+
 export default function EmailEditPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const { getEvent } = useEvents();
+  const [images, setImages] = useState<Record<string, string>>({});
   const [props, setProps] = useState<Omit<EventProperties, 'event_id'>>(defaultProps);
   const [saved, setSaved] = useState(false);
   const [remotePreviewHtml, setRemotePreviewHtml] = useState<string | null>(null);
@@ -124,8 +177,13 @@ export default function EmailEditPage() {
         const apiEvent = (res && (res as any).event) as any;
         const propsFromApi: any = {};
         if (apiEvent && Array.isArray(apiEvent.properties)) {
+          const loadedImages: Record<string, string> = {};
           apiEvent.properties.forEach((p: any) => {
-            if (!p || !p.name) return;
+            if (p && IMAGE_NAMES.includes(p.name)) loadedImages[p.name] = p.value ?? '';
+          });
+          if (mounted) setImages(loadedImages);
+          apiEvent.properties.forEach((p: any) => {
+            if (!p || !p.name || IMAGE_NAMES.includes(p.name)) return;
             if (p.name === 'invitationpre') propsFromApi.invitationpre = p.value ?? '';
             else if (p.name === 'invitationpost') propsFromApi.invitationpost = p.value ?? '';
             else propsFromApi[p.name] = p.value ?? '';
@@ -222,6 +280,23 @@ export default function EmailEditPage() {
     }
   };
 
+  const handleImageUploaded = (name: string, code: string) => {
+    setImages(prev => ({ ...prev, [name]: code }));
+    void refreshPreview();
+  };
+
+  const renderImageField = (f: (typeof IMAGE_FIELDS)[number]) => (
+    <FileUploadField
+      key={f.name}
+      label={f.label}
+      id={f.id}
+      eventId={eventId ? Number(eventId) : undefined}
+      propertyName={f.name}
+      imageCode={images[f.name]}
+      onUploaded={handleImageUploaded}
+    />
+  );
+
   const handleClear = () => {
     if (!eventId) return;
     localStorage.removeItem(`event_props_${eventId}`);
@@ -295,8 +370,7 @@ export default function EmailEditPage() {
         <div className="p-6 space-y-5 bg-white border shadow-sm rounded-xl border-slate-200">
           {/* Top file uploads */}
           <div className="grid grid-cols-2 gap-4">
-            <FileUploadField label="Header Image 1" id="header-img-1" />
-            <FileUploadField label="Header Image 2" id="header-img-2" />
+            {IMAGE_FIELDS.slice(0, 2).map(f => renderImageField(f))}
           </div>
 
           <FormField label="Pre-Text" hint="Opening paragraph before event details">
@@ -320,8 +394,7 @@ export default function EmailEditPage() {
 
           {/* Bottom file uploads */}
           <div className="grid grid-cols-2 gap-4">
-            <FileUploadField label="Footer Image 1" id="footer-img-1" />
-            <FileUploadField label="Footer Image 2" id="footer-img-2" />
+            {IMAGE_FIELDS.slice(2).map(f => renderImageField(f))}
           </div>
         </div>
 
