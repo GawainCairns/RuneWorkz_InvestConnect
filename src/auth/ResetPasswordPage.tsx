@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle, Eye, EyeOff, KeyRound, TrendingUp } from 'lucide-react';
+import { AlertCircle, CheckCircle, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AUTH_API_BASE, TENANT_ID } from '../config/constants';
@@ -106,11 +106,8 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-accent-50 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-semibold text-gray-900">InvestConnect</span>
+          <Link to="/" className="inline-flex items-center mb-6">
+            <img src="/investconnect-logo.png" alt="InvestConnect" className="h-[60px] w-auto" />
           </Link>
           <h1 className="text-2xl font-semibold text-gray-900">Reset your password</h1>
           <p className="text-gray-500 mt-1 text-sm">Choose a new password for your account</p>

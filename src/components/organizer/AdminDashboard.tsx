@@ -1,28 +1,9 @@
-import { Calendar, CheckCircle, ChevronDown, Coins, Mail, Plus, Search, Users } from 'lucide-react';
+import { Calendar, ChevronDown, Mail, Plus, Search, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../../contexts/EventContext';
 import { useInvitees } from '../../contexts/InviteeContext';
 import EventCard from './EventCard';
-
-interface StatCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: number | string;
-  color: string;
-}
-
-function StatCard({ icon, label, value, color }: StatCardProps) {
-  return (
-    <div className="p-5 bg-white border shadow-sm rounded-xl border-slate-200">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-medium text-slate-600">{label}</span>
-        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${color}`}>{icon}</div>
-      </div>
-      <div className="text-3xl font-bold text-slate-900">{value}</div>
-    </div>
-  );
-}
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -53,10 +34,6 @@ export default function AdminDashboard() {
     };
   }, [events, searchQuery, now]);
 
-  const totalInvitees = invitees.length;
-  const totalConfirmed = invitees.filter(i => i.rsvp_status === 'yes').length;
-  const totalPaid = invitees.filter(i => i.payment_status === 'paid').length;
-
   const getStats = (eventId: string) => {
     const evInvitees = invitees.filter(i => i.event_id === eventId);
     return {
@@ -71,7 +48,6 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="mt-1 text-sm text-slate-500">Overview of your events and guests</p>
         </div>
         <button
           onClick={() => navigate('/admin/events/new')}
@@ -80,33 +56,6 @@ export default function AdminDashboard() {
           <Plus className="w-4 h-4" />
           New Event
         </button>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 mb-8 lg:grid-cols-4">
-        <StatCard
-          icon={<Calendar className="w-5 h-5 text-brand-600" />}
-          label="Total Events"
-          value={events.length}
-          color="bg-brand-50"
-        />
-        <StatCard
-          icon={<Users className="w-5 h-5 text-slate-600" />}
-          label="Total Invitees"
-          value={totalInvitees}
-          color="bg-slate-100"
-        />
-        <StatCard
-          icon={<CheckCircle className="w-5 h-5 text-emerald-600" />}
-          label="Confirmed"
-          value={totalConfirmed}
-          color="bg-emerald-50"
-        />
-        <StatCard
-          icon={<Coins className="w-5 h-5 text-amber-600" />}
-          label="Paid"
-          value={totalPaid}
-          color="bg-amber-50"
-        />
       </div>
 
       {/* Quick Actions */}

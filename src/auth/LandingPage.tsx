@@ -4,7 +4,6 @@ import {
   Calendar,
   ChevronRight,
   Shield,
-  TrendingUp,
   Users,
   Zap,
 } from 'lucide-react';
@@ -32,12 +31,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white">
       <nav className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-lg font-semibold text-gray-900">InvestConnect</span>
-          </div>
+          <img src="/investconnect-logo.png" alt="InvestConnect" className="h-[60px] w-auto" />
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/login')}
@@ -189,14 +183,9 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-8 px-4">
+      <footer className="bg-white text-gray-500 py-8 px-4 shadow-[0_-8px_24px_rgba(15,23,42,0.14)]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center">
-              <TrendingUp className="w-3 h-3 text-white" />
-            </div>
-            <span className="text-sm font-medium text-white">InvestConnect</span>
-          </div>
+          <img src="/investconnect-logo.png" alt="InvestConnect" className="h-[60px] w-auto" />
           <span className="text-sm">&copy; {new Date().getFullYear()} InvestConnect. All rights reserved.</span>
         </div>
       </footer>

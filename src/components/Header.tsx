@@ -1,4 +1,4 @@
-import { ChevronDown, LogOut, TrendingUp, User, Home, Mail, Calendar, FileText } from 'lucide-react';
+import { ChevronDown, LogOut, User, Home, Mail, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -36,14 +36,9 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 group"
+          className="flex items-center group"
         >
-          <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center group-hover:bg-brand-700 transition-colors">
-            <TrendingUp className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-lg font-semibold text-gray-900 group-hover:text-brand-600 transition-colors">
-            InvestConnect
-          </span>
+          <img src="/investconnect-logo.png" alt="InvestConnect" className="h-[60px] w-auto" />
         </button>
 
         <div className="relative">

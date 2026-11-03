@@ -1,4 +1,4 @@
-import { CheckCircle, Mail, TrendingUp } from 'lucide-react';
+import { CheckCircle, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AUTH_API_BASE, TENANT_ID } from '../config/constants';
@@ -43,11 +43,8 @@ export default function ForgotPasswordPage() {
     <div className="flex items-center justify-center min-h-screen px-4 py-12 bg-gradient-to-br from-brand-50 via-white to-accent-50">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="flex items-center justify-center w-10 h-10 bg-brand-600 rounded-xl">
-              <TrendingUp className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-semibold text-gray-900">InvestConnect</span>
+          <Link to="/" className="inline-flex items-center mb-6">
+            <img src="/investconnect-logo.png" alt="InvestConnect" className="h-[60px] w-auto" />
           </Link>
           <h1 className="text-2xl font-semibold text-gray-900">Forgot your password?</h1>
           <p className="mt-1 text-sm text-gray-500">
