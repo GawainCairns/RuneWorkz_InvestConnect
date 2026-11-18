@@ -54,10 +54,12 @@ export default function RSVPPage() {
       <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
         <div className="w-full max-w-md">
           <div className="mb-2 text-center">
-            <span className="text-xs font-semibold tracking-widest uppercase text-slate-400">Step 1 of 4</span>
+            <span className="text-xs font-semibold tracking-widest uppercase text-slate-400">
+              Step 1 of {event.price > 0 ? '4' : '3'}
+            </span>
           </div>
           <div className="w-full h-1 mb-8 overflow-hidden rounded-full bg-slate-200">
-            <div className="h-1 rounded-full bg-brand-600" style={{ width: '25%' }} />
+            <div className="h-1 rounded-full bg-brand-600" style={{ width: event.price > 0 ? '25%' : '33%' }} />
           </div>
 
           <div className="p-8 bg-white border shadow-lg rounded-xl border-slate-200">

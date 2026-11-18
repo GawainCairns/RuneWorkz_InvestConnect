@@ -4,11 +4,13 @@ import { useAlert } from '../../contexts/AlertContext';
 import { useEmailLogs } from '../../contexts/EmailLogContext';
 import { useInvitees } from '../../contexts/InviteeContext';
 import { emailService } from '../../services/emailService';
+import type { Manager } from '../../types/api';
 import type { Invitee } from '../../types/organizer';
 
 interface InviteeTableProps {
   eventId: string;
   invitees: Invitee[];
+  managers?: Manager[];
 }
 
 function StatusBadge({ value, positive, negative }: { value: string; positive: string; negative: string }) {
@@ -28,7 +30,7 @@ function StatusBadge({ value, positive, negative }: { value: string; positive: s
   );
 }
 
-export default function InviteeTable({ eventId, invitees }: InviteeTableProps) {
+export default function InviteeTable({ eventId, invitees, managers }: InviteeTableProps) {
   const { markPaid } = useInvitees();
   const { logEmail } = useEmailLogs();
   const { showAlert } = useAlert();
@@ -83,6 +85,9 @@ export default function InviteeTable({ eventId, invitees }: InviteeTableProps) {
             <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">Name</th>
             <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">Email</th>
             <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">Company</th>
+            {managers && (
+              <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">Manager</th>
+            )}
             <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">RSVP</th>
             <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">Payment</th>
             <th className="text-left py-3 px-4 font-medium text-slate-600 text-xs uppercase tracking-wide">Dietary</th>
@@ -106,6 +111,13 @@ export default function InviteeTable({ eventId, invitees }: InviteeTableProps) {
                   <span className="text-slate-400">—</span>
                 )}
               </td>
+              {managers && (
+                <td className="py-3 px-4 text-slate-600">
+                  {managers.find(manager => String(manager.id) === invitee.manager_id)?.name || (
+                    <span className="text-slate-400">—</span>
+                  )}
+                </td>
+              )}
               <td className="py-3 px-4">
                 <StatusBadge value={invitee.rsvp_status} positive="confirmed" negative="declined" />
               </td>

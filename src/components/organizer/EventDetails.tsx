@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, Clock, Coins, CreditCard as Edit, Link2, Mail, MapPin, Send, UserPlus, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Coins, Copy, CreditCard as Edit, Link2, Mail, MapPin, Send, UserPlus, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAlert } from '../../contexts/AlertContext';
@@ -78,6 +78,16 @@ export default function EventDetails() {
   const event = eventId ? getEvent(eventId) : undefined;
   const thirdPartyUrl = `${window.location.origin}/event/register/${encodeURIComponent(thirdPartyLink)}`;
 
+  const copyLink = async (url: string, label: string) => {
+    try {
+      if (!navigator.clipboard) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(url);
+      showAlert(`${label} copied`, 'success');
+    } catch {
+      showAlert('Could not copy the link. Please copy it manually.', 'error');
+    }
+  };
+
   useEffect(() => {
     if (eventId) {
       fetchInvitees(eventId);
@@ -153,7 +163,7 @@ export default function EventDetails() {
   };
 
   useEffect(() => {
-    if (activeTab === 'managers' && eventId) {
+    if (activeTab !== 'emails' && eventId) {
       fetchManagers();
     }
   }, [activeTab, eventId]);
@@ -337,25 +347,29 @@ export default function EventDetails() {
           </div>
 
           {thirdPartyLink && (
-            <div className="flex items-center gap-2.5 text-sm text-slate-600 mb-6 min-w-0">
-              <Link2 className="w-4 h-4 text-slate-400 shrink-0" />
-              <span className="shrink-0">RSVP link:</span>
-              <a
-                href={thirdPartyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="truncate text-brand-600 hover:underline"
-              >
-                {thirdPartyUrl}
-              </a>
+            <div className="flex flex-col gap-3 p-4 mb-6 border rounded-lg bg-slate-50 border-slate-200 sm:flex-row sm:items-center">
+              <div className="flex items-start min-w-0 gap-3 flex-1">
+                <div className="p-2 rounded-lg bg-brand-50 text-brand-600 shrink-0">
+                  <Link2 className="w-4 h-4" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900">RSVP link</p>
+                  <a
+                    href={thirdPartyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm break-all text-brand-600 hover:underline"
+                  >
+                    {thirdPartyUrl}
+                  </a>
+                </div>
+              </div>
               <button
-                onClick={() => {
-                  navigator.clipboard?.writeText(thirdPartyUrl);
-                  showAlert('RSVP link copied', 'success');
-                }}
-                className="text-xs font-medium shrink-0 text-brand-600 hover:underline"
+                onClick={() => copyLink(thirdPartyUrl, 'RSVP link')}
+                className="inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium transition-colors bg-white border rounded-lg shrink-0 text-slate-700 border-slate-300 hover:bg-slate-100"
               >
-                Copy
+                <Copy className="w-4 h-4" aria-hidden="true" />
+                Copy link
               </button>
             </div>
           )}
@@ -467,7 +481,7 @@ export default function EventDetails() {
                   </div>
                 </div>
 
-                <InviteeTable eventId={eventId!} invitees={eventInvitees} />
+                <InviteeTable eventId={eventId!} invitees={eventInvitees} managers={managers} />
               </div>
             )}
             {activeTab === 'managers' && (
@@ -509,9 +523,24 @@ export default function EventDetails() {
                             <td className="py-3 px-4 text-slate-600">{mgr.email}</td>
                             <td className="py-3 px-4 text-slate-600">
                               {mgr.thirdPartyLink ? (
-                                <span className="text-xs text-brand-600">
-                                  {window.location.origin}/event/reg/{encodeURIComponent(mgr.thirdPartyLink)}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <a
+                                    href={`${window.location.origin}/event/reg/${encodeURIComponent(mgr.thirdPartyLink)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs break-all text-brand-600 hover:underline"
+                                  >
+                                    {window.location.origin}/event/reg/{encodeURIComponent(mgr.thirdPartyLink)}
+                                  </a>
+                                  <button
+                                    onClick={() => copyLink(`${window.location.origin}/event/reg/${encodeURIComponent(mgr.thirdPartyLink)}`, 'Manager link')}
+                                    aria-label={`Copy registration link for ${mgr.name}`}
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition-colors bg-white border rounded-lg shrink-0 text-slate-700 border-slate-300 hover:bg-slate-100"
+                                  >
+                                    <Copy className="w-3.5 h-3.5" aria-hidden="true" />
+                                    Copy
+                                  </button>
+                                </div>
                               ) : (
                                 <span className="text-xs text-slate-400">No link yet</span>
                               )}

@@ -1,7 +1,7 @@
 import { apiGet, apiPost } from './api';
 
 export const IMAGINARY_BASE_URL =
-  (import.meta.env.VITE_IMAGINARY_API_BASE_URL as string | undefined) ?? 'https://imaginary.runeworkz.com';
+  (import.meta.env.MAGICSTACK_IMAGINARY_URL as string | undefined) ?? 'https://imaginary.magicrunez.com';
 
 export interface ImageTransform {
   w?: number;

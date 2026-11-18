@@ -1,4 +1,4 @@
-import { Calendar, Check, ChevronDown, Clock, MapPin, Shield, TrendingUp, User } from 'lucide-react';
+import { Calendar, Check, ChevronDown, Clock, MapPin, Shield, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { eventService, eventPropertyService } from '../../services/eventService';
@@ -204,13 +204,8 @@ export default function ThirdPartyRegistration() {
   const EventInfoPanel = (
     <div className="bg-gradient-to-br from-brand-700 via-brand-600 to-brand-800 text-white rounded-2xl overflow-hidden shadow-xl">
       <div className="p-8">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="flex items-center justify-center w-10 h-10 bg-white/15 rounded-lg backdrop-blur-sm">
-            <TrendingUp className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xs font-semibold tracking-widest uppercase text-brand-200">
-            You're invited
-          </span>
+        <div className="p-3 mb-4 bg-white rounded-lg">
+          <img src="/investconnect-logo.png" alt="InvestConnect" className="w-full h-auto" />
         </div>
 
         <h1 className="text-2xl font-bold leading-tight mb-3">{event.title}</h1>
