@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { emailCtaCss } from './emailPreviewStyles';
 
 interface EmailPreviewModalProps {
   subject: string;
@@ -30,7 +31,7 @@ export default function EmailPreviewModal({ subject, toEmail, sentAt, body, onCl
   const srcDoc = useMemo(() => {
     // strip script tags to avoid executing embedded scripts in email HTML
     const stripped = body.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
-    return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui,sans-serif;padding:16px;margin:0;font-size:14px;line-height:1.6;color:#1e293b;}</style></head><body>${stripped}</body></html>`;
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui,sans-serif;padding:16px;margin:0;font-size:14px;line-height:1.6;color:#1e293b;}${emailCtaCss}</style></head><body>${stripped}</body></html>`;
   }, [body]);
 
   const { isJson, parsed } = useMemo(() => {

@@ -8,6 +8,7 @@ import FormField from './FormField';
 import { emailService } from '../../services/emailService';
 import { eventService, eventPropertyService } from '../../services/eventService';
 import { imageService } from '../../services/imageService';
+import { emailCtaStyle } from './emailPreviewStyles';
 
 const inputClass =
   'w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors';
@@ -34,7 +35,7 @@ function buildPreview(event: { brand: string; title: string; description: string
         <p><strong>Date:</strong> ${event.date}</p>
         ${props.invitationpost ? `<p>${props.invitationpost}</p>` : ''}
         <div style="margin-top:24px;text-align:center;">
-          <a href="#" style="background:#2563eb;color:white;padding:12px 32px;border-radius:6px;text-decoration:none;font-weight:600;">RSVP Now</a>
+          <a href="#" style="${emailCtaStyle}">RSVP Now</a>
         </div>
       </div>
     </div>
