@@ -171,7 +171,7 @@ export default function RegisterPage() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          <button type="button" onClick={() => window.history.back()} className="hover:text-gray-600 transition-colors">← Back to home</button>
+          <Link to="/" className="hover:text-gray-600 transition-colors">← Back to home</Link>
         </p>
       </div>
     </div>

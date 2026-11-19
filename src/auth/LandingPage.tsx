@@ -1,194 +1,83 @@
-import {
-  BarChart2,
-  Bell,
-  Calendar,
-  ChevronRight,
-  Shield,
-  Users,
-  Zap,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import landingData from '../config/landing.json';
+import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import Footer from '../components/Footer';
+import Header from '../components/Header';
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Calendar,
-  Users,
-  Bell,
-  BarChart2,
-  Shield,
-  Zap,
-};
+const highlights = [
+  {
+    title: 'Bring people together',
+    description: 'Create space for thoughtful conversations and new perspectives.',
+  },
+  {
+    title: 'Make introductions',
+    description: 'Connect with the people who shape the asset management industry.',
+  },
+  {
+    title: 'Build lasting relationships',
+    description: 'Turn meaningful meetings into stronger professional connections.',
+  },
+];
 
 export default function LandingPage() {
-  const navigate = useNavigate();
-  const { hero, benefits, howItWorks, testimonials, cta } = landingData;
-
-  const handleCTA = (action: string) => {
-    navigate(action === 'register' ? '/register' : '/login');
-  };
-
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <img src="/investconnect-logo.png" alt="InvestConnect" className="h-[60px] w-auto" />
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/login')}
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-2"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={() => navigate('/register')}
-              className="text-sm font-medium bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors"
-            >
-              Get Started
-            </button>
-          </div>
-        </div>
-      </nav>
+    <div className="flex flex-col min-h-screen bg-white">
+      <Header />
 
-      {/* Hero */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-brand-50 to-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-accent-100 text-accent-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
-            <span className="w-1.5 h-1.5 bg-accent-500 rounded-full" />
-            Event Management Reimagined
+      <main className="flex flex-col flex-1">
+        <section className="relative px-5 py-20 overflow-hidden sm:px-8 sm:py-28 bg-gradient-to-br from-brand-50 via-white to-accent-50">
+          <div className="absolute rounded-full pointer-events-none -top-32 -right-24 h-96 w-96 bg-brand-100/50 blur-3xl" />
+          <div className="relative max-w-4xl mx-auto text-center">
+            <p className="mb-5 text-sm font-semibold tracking-wide uppercase text-brand-700">
+              InvestConnect
+            </p>
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+              Creating connections in the asset management industry.
+            </h1>
+            <p className="max-w-2xl mx-auto mt-6 text-lg leading-relaxed text-slate-600">
+              Bring professionals together through thoughtful events and meaningful conversations.
+            </p>
+            <div className="flex flex-col items-center justify-center gap-3 mt-9 sm:flex-row">
+              <Link
+                to="/register"
+                className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 text-sm font-semibold text-white transition-colors rounded-lg sm:w-auto bg-brand-600 hover:bg-brand-700"
+              >
+                Get started
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold transition-colors border rounded-lg sm:w-auto border-slate-300 text-slate-700 hover:bg-white"
+              >
+                Sign in
+              </Link>
+            </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-gray-900 leading-tight mb-6">
-            {hero.headline}
-          </h1>
-          <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            {hero.subheadline}
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              onClick={() => handleCTA(hero.cta.primary.action)}
-              className="flex items-center gap-2 bg-brand-600 text-white px-8 py-3.5 rounded-xl font-medium hover:bg-brand-700 transition-all hover:shadow-lg hover:shadow-brand-200 w-full sm:w-auto"
-            >
-              {hero.cta.primary.label}
-              <ChevronRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => handleCTA(hero.cta.secondary.action)}
-              className="flex items-center gap-2 border border-gray-200 text-gray-700 px-8 py-3.5 rounded-xl font-medium hover:border-gray-300 hover:bg-gray-50 transition-all w-full sm:w-auto"
-            >
-              {hero.cta.secondary.label}
-            </button>
-          </div>
-        </div>
-        <div className="mt-16 max-w-5xl mx-auto">
-          <div className="bg-gradient-to-br from-brand-600 to-brand-800 rounded-2xl p-8 shadow-2xl shadow-brand-200">
-            <div className="grid grid-cols-3 gap-6 text-center">
-              {[
-                { value: '500+', label: 'Events Created' },
-                { value: '10k+', label: 'Invitations Sent' },
-                { value: '98%', label: 'Satisfaction Rate' },
-              ].map(stat => (
-                <div key={stat.label}>
-                  <div className="text-3xl font-semibold text-white mb-1">{stat.value}</div>
-                  <div className="text-brand-200 text-sm">{stat.label}</div>
-                </div>
+        </section>
+
+        <section className="px-5 py-16 sm:px-8 sm:py-20">
+          <div className="max-w-7xl mx-auto">
+            <div className="max-w-2xl mb-10">
+              <h2 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
+                Good connections start with a conversation.
+              </h2>
+              <p className="mt-3 leading-relaxed text-slate-600">
+                InvestConnect helps make those conversations easier to create and bring people together.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {highlights.map((highlight, index) => (
+                <article key={highlight.title} className="p-6 border rounded-xl border-slate-200 bg-white">
+                  <span className="text-sm font-semibold text-brand-700">0{index + 1}</span>
+                  <h3 className="mt-4 text-base font-semibold text-slate-900">{highlight.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{highlight.description}</p>
+                </article>
               ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      {/* Benefits */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-4">{benefits.title}</h2>
-            <p className="text-gray-500 text-lg max-w-xl mx-auto">{benefits.subtitle}</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {benefits.items.map(item => {
-              const Icon = iconMap[item.icon] || Calendar;
-              return (
-                <div
-                  key={item.title}
-                  className="group p-6 rounded-2xl border border-gray-100 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-50 transition-all"
-                >
-                  <div className="w-11 h-11 bg-brand-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-100 transition-colors">
-                    <Icon className="w-5 h-5 text-brand-600" />
-                  </div>
-                  <h3 className="text-base font-semibold text-gray-900 mb-2">{item.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{item.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-4">{howItWorks.title}</h2>
-            <p className="text-gray-500 text-lg max-w-xl mx-auto">{howItWorks.subtitle}</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {howItWorks.steps.map((step, idx) => (
-              <div key={step.step} className="relative text-center">
-                {idx < howItWorks.steps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-[calc(50%+3rem)] right-[calc(-50%+3rem)] h-px bg-gray-200" />
-                )}
-                <div className="w-16 h-16 bg-brand-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-5 text-lg font-semibold shadow-lg shadow-brand-200">
-                  {step.step}
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{step.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-4">{testimonials.title}</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.items.map(t => (
-              <div key={t.name} className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-                <p className="text-gray-600 text-sm leading-relaxed mb-5 italic">"{t.quote}"</p>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">{t.name}</p>
-                  <p className="text-xs text-gray-400">{t.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-brand-600">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">{cta.title}</h2>
-          <p className="text-brand-200 text-lg mb-8">{cta.subtitle}</p>
-          <button
-            onClick={() => handleCTA(cta.button.action)}
-            className="inline-flex items-center gap-2 bg-accent-500 text-white px-8 py-3.5 rounded-xl font-medium hover:bg-accent-600 transition-all hover:shadow-xl"
-          >
-            {cta.button.label}
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-white text-gray-500 py-8 px-4 shadow-[0_-8px_24px_rgba(15,23,42,0.14)]">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <img src="/investconnect-logo.png" alt="InvestConnect" className="h-[60px] w-auto" />
-          <span className="text-sm">&copy; {new Date().getFullYear()} InvestConnect. All rights reserved.</span>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

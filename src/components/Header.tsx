@@ -41,51 +41,51 @@ export default function Header() {
           <img src="/investconnect-logo.png" alt="InvestConnect" className="h-[60px] w-auto" />
         </button>
 
-        <div className="relative">
-          <button
-            onClick={() => setMenuOpen(prev => !prev)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <div className="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center">
-              <User className="w-4 h-4 text-brand-700" />
-            </div>
-            <span className="text-sm font-medium text-gray-700 hidden sm:block">{fullName}</span>
-            <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
-          </button>
+        {profile ? (
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen(prev => !prev)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <div className="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center">
+                <User className="w-4 h-4 text-brand-700" />
+              </div>
+              <span className="text-sm font-medium text-gray-700 hidden sm:block">{fullName}</span>
+              <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+            </button>
 
-          {menuOpen && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-              <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-xs text-gray-500">Signed in as</p>
-                  <p className="text-sm font-medium text-gray-900 truncate">{profile?.user.email}</p>
-                </div>
-                <button
-                  onClick={() => { setMenuOpen(false); navigate('/profile'); }}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <User className="w-4 h-4 text-gray-400" />
-                  Profile
-                </button>
-                {hasAdminRole(profile) && (
+            {menuOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-xs text-gray-500">Signed in as</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">{profile.user.email}</p>
+                  </div>
                   <button
-                    onClick={() => { setMenuOpen(false); navigate('/admin'); }}
+                    onClick={() => { setMenuOpen(false); navigate('/profile'); }}
                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
-                    <Home className="w-4 h-4 text-gray-400" />
-                    Dashboard
+                    <User className="w-4 h-4 text-gray-400" />
+                    Profile
                   </button>
-                )}
-                <button
-                  onClick={() => { setMenuOpen(false); navigate('/invitee-dashboard'); }}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <Mail className="w-4 h-4 text-gray-400" />
-                  My Invitations
-                </button>
-                {hasAdminRole(profile) && (
-                  <>
+                  {hasAdminRole(profile) && (
+                    <button
+                      onClick={() => { setMenuOpen(false); navigate('/admin'); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <Home className="w-4 h-4 text-gray-400" />
+                      Dashboard
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setMenuOpen(false); navigate('/invitee-dashboard'); }}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <Mail className="w-4 h-4 text-gray-400" />
+                    My Invitations
+                  </button>
+                  {hasAdminRole(profile) && (
                     <button
                       onClick={() => { setMenuOpen(false); navigate('/admin/emails'); }}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -93,19 +93,34 @@ export default function Header() {
                       <FileText className="w-4 h-4 text-gray-400" />
                       Email Logs
                     </button>
-                  </>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/login')}
+              className="px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => navigate('/register')}
+              className="px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
+            >
+              Get Started
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );
