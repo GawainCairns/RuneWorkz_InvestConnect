@@ -3,21 +3,6 @@ import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 
-const highlights = [
-  {
-    title: 'Bring people together',
-    description: 'Create space for thoughtful conversations and new perspectives.',
-  },
-  {
-    title: 'Make introductions',
-    description: 'Connect with the people who shape the asset management industry.',
-  },
-  {
-    title: 'Build lasting relationships',
-    description: 'Turn meaningful meetings into stronger professional connections.',
-  },
-];
-
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -63,15 +48,6 @@ export default function LandingPage() {
               <p className="mt-3 leading-relaxed text-slate-600">
                 InvestConnect helps make those conversations easier to create and bring people together.
               </p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {highlights.map((highlight, index) => (
-                <article key={highlight.title} className="p-6 border rounded-xl border-slate-200 bg-white">
-                  <span className="text-sm font-semibold text-brand-700">0{index + 1}</span>
-                  <h3 className="mt-4 text-base font-semibold text-slate-900">{highlight.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{highlight.description}</p>
-                </article>
-              ))}
             </div>
           </div>
         </section>
